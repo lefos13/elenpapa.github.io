@@ -1,11 +1,11 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import handleAuthLogin from '../handlers/auth-login'
-import handleAuthLogout from '../handlers/auth-logout'
-import handleAuthSession from '../handlers/auth-session'
-import { createSessionToken } from '../auth'
-import { AUTH_COOKIE_NAME } from '../config'
+import handleAuthLogin from '../handlers/auth-login.js'
+import handleAuthLogout from '../handlers/auth-logout.js'
+import handleAuthSession from '../handlers/auth-session.js'
+import { createSessionToken } from '../auth.js'
+import { AUTH_COOKIE_NAME } from '../config.js'
 
 function createMockRequest(options: {
   method?: string

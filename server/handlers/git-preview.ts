@@ -6,7 +6,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import path from 'node:path'
-import { readJsonBody, sendJson } from '../http'
+import { readJsonBody, sendJson } from '../http.js'
 
 interface PreviewRequestBody {
   sessionPaths?: string[]

@@ -6,8 +6,8 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { getAuthenticatedUser } from '../auth-guard'
-import { sendJson } from '../http'
+import { getAuthenticatedUser } from '../auth-guard.js'
+import { sendJson } from '../http.js'
 
 export default async function handleAuthSession(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'GET') {

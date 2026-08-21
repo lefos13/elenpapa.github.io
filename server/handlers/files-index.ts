@@ -7,9 +7,9 @@
 import { stat } from 'node:fs/promises'
 import path from 'node:path'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { listContentFilesFromGit } from '../github'
-import { isHttpError, sendJson } from '../http'
-import { listContentFileDescriptors } from '../schemas'
+import { listContentFilesFromGit } from '../github.js'
+import { isHttpError, sendJson } from '../http.js'
+import { listContentFileDescriptors } from '../schemas.js'
 
 export default async function handleFilesIndex(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'GET' && req.method !== 'HEAD') {

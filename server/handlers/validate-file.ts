@@ -6,9 +6,9 @@
 
 import path from 'node:path'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { readContentFileFromGit } from '../github'
-import { HttpError, isHttpError, readJsonBody, sendJson } from '../http'
-import { validateContentPayload } from '../schemas'
+import { readContentFileFromGit } from '../github.js'
+import { HttpError, isHttpError, readJsonBody, sendJson } from '../http.js'
+import { validateContentPayload } from '../schemas.js'
 
 function extractFilePath(req: VercelRequest): string {
   const queryFile = req.query.file

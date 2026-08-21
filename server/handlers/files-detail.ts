@@ -7,10 +7,10 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { requireAuth } from '../auth-guard'
-import { calculateGitBlobSha, readContentFileFromGit } from '../github'
-import { HttpError, isHttpError, readJsonBody, sendJson } from '../http'
-import { buildEditorSchema, validateContentPayload } from '../schemas'
+import { requireAuth } from '../auth-guard.js'
+import { calculateGitBlobSha, readContentFileFromGit } from '../github.js'
+import { HttpError, isHttpError, readJsonBody, sendJson } from '../http.js'
+import { buildEditorSchema, validateContentPayload } from '../schemas.js'
 
 function extractFilePath(req: VercelRequest): string {
   const queryFile = req.query.file

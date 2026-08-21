@@ -6,14 +6,14 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { requireAuth } from '../auth-guard'
+import { requireAuth } from '../auth-guard.js'
 import {
   listContentFilesFromGit,
   listImagesFromGitTree,
   readContentFileFromGit,
-} from '../github'
-import { isHttpError, sendJson } from '../http'
-import { collectImageUsages, type ImageUsageItem } from '../schemas'
+} from '../github.js'
+import { isHttpError, sendJson } from '../http.js'
+import { collectImageUsages, type ImageUsageItem } from '../schemas.js'
 
 export interface IndexedImageItem {
   name: string

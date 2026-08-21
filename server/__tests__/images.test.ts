@@ -1,10 +1,10 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import handleImagesIndex from '../handlers/images-index'
-import handleUploadImage from '../handlers/upload-image'
-import { createSessionToken } from '../auth'
-import { AUTH_COOKIE_NAME } from '../config'
+import handleImagesIndex from '../handlers/images-index.js'
+import handleUploadImage from '../handlers/upload-image.js'
+import { createSessionToken } from '../auth.js'
+import { AUTH_COOKIE_NAME } from '../config.js'
 
 function createMockRequest(options: {
   method?: string

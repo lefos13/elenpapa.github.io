@@ -3,12 +3,12 @@ import path from 'node:path'
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import handleGitStatus from '../handlers/git-status'
-import handleGitPreview from '../handlers/git-preview'
-import handleGitFinalize from '../handlers/git-finalize'
-import handleSessionSummary from '../handlers/session-summary'
-import { createSessionToken } from '../auth'
-import { AUTH_COOKIE_NAME } from '../config'
+import handleGitStatus from '../handlers/git-status.js'
+import handleGitPreview from '../handlers/git-preview.js'
+import handleGitFinalize from '../handlers/git-finalize.js'
+import handleSessionSummary from '../handlers/session-summary.js'
+import { createSessionToken } from '../auth.js'
+import { AUTH_COOKIE_NAME } from '../config.js'
 
 function createMockRequest(options: {
   method?: string

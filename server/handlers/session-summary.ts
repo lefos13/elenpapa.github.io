@@ -6,7 +6,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import path from 'node:path'
-import { sendJson } from '../http'
+import { sendJson } from '../http.js'
 
 export interface SessionSummaryResult {
   touchedPaths: string[]

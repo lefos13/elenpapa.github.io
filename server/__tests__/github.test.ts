@@ -14,7 +14,7 @@ import {
   createPullRequestForFinalize,
   getContentFileSha,
   deleteBranch,
-} from '../github'
+} from '../github.js'
 
 describe('github.ts adapter', () => {
   describe('utility functions', () => {

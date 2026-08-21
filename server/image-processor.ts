@@ -13,8 +13,8 @@ import {
   IMAGE_FOLDER_BY_FILE,
   MAX_UPLOAD_BYTES,
   ORIGINAL_PATH_RULES,
-} from './config'
-import { HttpError } from './http'
+} from './config.js'
+import { HttpError } from './http.js'
 
 /**
  * Image folder targets that participate in automatic responsive srcset generation.

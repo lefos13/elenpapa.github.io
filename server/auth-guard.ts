@@ -5,9 +5,9 @@
  */
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { parseCookies, verifySessionToken, type SessionPayload } from './auth'
-import { AUTH_COOKIE_NAME } from './config'
-import { sendJson } from './http'
+import { parseCookies, verifySessionToken, type SessionPayload } from './auth.js'
+import { AUTH_COOKIE_NAME } from './config.js'
+import { sendJson } from './http.js'
 
 /**
  * Extracts session token from incoming request (Cookie first, then Bearer header).

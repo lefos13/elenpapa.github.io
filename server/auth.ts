@@ -7,7 +7,7 @@
 import crypto from 'node:crypto'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { SignJWT, jwtVerify, type JWTPayload } from 'jose'
-import { ADMIN_PASSWORD, ADMIN_PASSWORD_HASH, AUTH_COOKIE_NAME, AUTH_SECRET } from './config'
+import { ADMIN_PASSWORD, ADMIN_PASSWORD_HASH, AUTH_COOKIE_NAME, AUTH_SECRET } from './config.js'
 
 export interface SessionPayload extends JWTPayload {
   user: string

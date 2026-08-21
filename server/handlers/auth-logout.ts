@@ -5,8 +5,8 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { clearAuthCookie } from '../auth'
-import { sendJson } from '../http'
+import { clearAuthCookie } from '../auth.js'
+import { sendJson } from '../http.js'
 
 export default async function handleAuthLogout(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'POST') {

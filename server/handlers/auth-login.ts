@@ -6,8 +6,8 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { createSessionToken, setAuthCookie, verifyAdminPassword } from '../auth'
-import { readJsonBody, sendJson } from '../http'
+import { createSessionToken, setAuthCookie, verifyAdminPassword } from '../auth.js'
+import { readJsonBody, sendJson } from '../http.js'
 
 interface LoginRequestBody {
   username?: string

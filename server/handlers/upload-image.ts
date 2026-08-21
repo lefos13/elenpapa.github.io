@@ -6,10 +6,10 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { requireAuth } from '../auth-guard'
-import { formatBytes } from '../github'
-import { isHttpError, readJsonBody, sendJson } from '../http'
-import { processUploadedImage } from '../image-processor'
+import { requireAuth } from '../auth-guard.js'
+import { formatBytes } from '../github.js'
+import { isHttpError, readJsonBody, sendJson } from '../http.js'
+import { processUploadedImage } from '../image-processor.js'
 
 export interface UploadImageRequestBody {
   base64?: string

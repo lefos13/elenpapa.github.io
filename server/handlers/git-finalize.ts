@@ -6,15 +6,15 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { requireAuth } from '../auth-guard'
+import { requireAuth } from '../auth-guard.js'
 import {
   commitSessionChanges,
   createPullRequestForFinalize,
   createReviewBranch,
   readContentFileFromGit,
   type CommitFileEntry,
-} from '../github'
-import { readJsonBody, sendJson } from '../http'
+} from '../github.js'
+import { readJsonBody, sendJson } from '../http.js'
 
 export interface FinalizeFilePayload {
   path: string

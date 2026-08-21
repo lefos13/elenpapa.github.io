@@ -16,8 +16,8 @@ import {
   GITHUB_OWNER,
   GITHUB_REPO,
   GITHUB_TOKEN,
-} from './config'
-import { HttpError } from './http'
+} from './config.js'
+import { HttpError } from './http.js'
 
 /**
  * Singleton Octokit client instance when running in configured cloud environments.

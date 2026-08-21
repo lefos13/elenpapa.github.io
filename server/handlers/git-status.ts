@@ -5,8 +5,8 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { getGitStatusSummary } from '../github'
-import { sendJson } from '../http'
+import { getGitStatusSummary } from '../github.js'
+import { sendJson } from '../http.js'
 
 export default async function handleGitStatus(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'GET') {

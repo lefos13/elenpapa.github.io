@@ -6,9 +6,9 @@
 
 import path from 'node:path'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { readContentFileFromGit } from '../github'
-import { HttpError, isHttpError, sendJson } from '../http'
-import { getSchemaById } from '../schemas'
+import { readContentFileFromGit } from '../github.js'
+import { HttpError, isHttpError, sendJson } from '../http.js'
+import { getSchemaById } from '../schemas.js'
 
 function extractSchemaId(req: VercelRequest): string {
   const queryId = req.query.id

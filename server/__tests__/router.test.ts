@@ -1,9 +1,9 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import routerHandler from '../../api/[...path]'
-import { createSessionToken } from '../auth'
-import { AUTH_COOKIE_NAME } from '../config'
+import routerHandler from '../../api/[...path].js'
+import { createSessionToken } from '../auth.js'
+import { AUTH_COOKIE_NAME } from '../config.js'
 
 function createMockRequest(options: {
   method?: string
