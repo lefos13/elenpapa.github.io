@@ -39,3 +39,4 @@ coverage
 __screenshots__/
 .tmp
 .cache
+.codex-local-test-runs
