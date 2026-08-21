@@ -22,7 +22,8 @@ function getSecretKey(): Uint8Array {
  * Appends a header to a ServerResponse without overwriting existing entries.
  */
 function appendHeader(res: ServerResponse, name: string, value: string): void {
-  const existing = res.getHeader(name)
+  if (typeof res.setHeader !== 'function') return
+  const existing = typeof res.getHeader === 'function' ? res.getHeader(name) : undefined
   if (!existing) {
     res.setHeader(name, value)
   } else if (Array.isArray(existing)) {

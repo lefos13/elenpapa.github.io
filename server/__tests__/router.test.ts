@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import routerHandler from '../../api/[...path].js'
+import routerHandler from '../router.js'
 import { createSessionToken } from '../auth.js'
 import { AUTH_COOKIE_NAME } from '../config.js'
 

@@ -64,11 +64,14 @@ type CompatibleResponse = ServerResponse & {
 export function sendJson(res: ServerResponse, statusCode: number, payload: unknown): void {
   const compatRes = res as CompatibleResponse
 
-  if (typeof compatRes.status === 'function') {
+  if (typeof compatRes.setHeader === 'function') {
     compatRes.setHeader('Content-Type', MIME_TYPES['.json'] ?? 'application/json; charset=utf-8')
     compatRes.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
     compatRes.setHeader('Pragma', 'no-cache')
     compatRes.setHeader('Expires', '0')
+  }
+
+  if (typeof compatRes.status === 'function') {
     const statusRes = compatRes.status(statusCode)
     if (typeof statusRes?.json === 'function') {
       statusRes.json(payload)
@@ -76,12 +79,17 @@ export function sendJson(res: ServerResponse, statusCode: number, payload: unkno
     }
   }
 
-  res.writeHead(statusCode, {
-    'content-type': MIME_TYPES['.json'] ?? 'application/json; charset=utf-8',
-    'cache-control': 'no-store, no-cache, must-revalidate, max-age=0',
-    pragma: 'no-cache',
-    expires: '0',
-  })
+  res.statusCode = statusCode
+  if (typeof res.writeHead === 'function') {
+    try {
+      res.writeHead(statusCode, {
+        'content-type': MIME_TYPES['.json'] ?? 'application/json; charset=utf-8',
+        'cache-control': 'no-store, no-cache, must-revalidate, max-age=0',
+        pragma: 'no-cache',
+        expires: '0',
+      })
+    } catch {}
+  }
   res.end(JSON.stringify(payload))
 }
 
@@ -91,11 +99,12 @@ export function sendJson(res: ServerResponse, statusCode: number, payload: unkno
 export function sendText(res: ServerResponse, statusCode: number, message: string): void {
   const compatRes = res as CompatibleResponse
 
-  if (typeof compatRes.status === 'function') {
-    compatRes.setHeader('Content-Type', 'text/plain; charset=utf-8')
+  if (typeof compatRes.setHeader === 'function') {
+    compatRes.setHeader('Content-Type', MIME_TYPES['.txt'] ?? 'text/plain; charset=utf-8')
     compatRes.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
-    compatRes.setHeader('Pragma', 'no-cache')
-    compatRes.setHeader('Expires', '0')
+  }
+
+  if (typeof compatRes.status === 'function') {
     const statusRes = compatRes.status(statusCode)
     if (typeof statusRes?.send === 'function') {
       statusRes.send(message)
@@ -103,12 +112,15 @@ export function sendText(res: ServerResponse, statusCode: number, message: strin
     }
   }
 
-  res.writeHead(statusCode, {
-    'content-type': 'text/plain; charset=utf-8',
-    'cache-control': 'no-store, no-cache, must-revalidate, max-age=0',
-    pragma: 'no-cache',
-    expires: '0',
-  })
+  res.statusCode = statusCode
+  if (typeof res.writeHead === 'function') {
+    try {
+      res.writeHead(statusCode, {
+        'content-type': MIME_TYPES['.txt'] ?? 'text/plain; charset=utf-8',
+        'cache-control': 'no-store, no-cache, must-revalidate, max-age=0',
+      })
+    } catch {}
+  }
   res.end(message)
 }
 

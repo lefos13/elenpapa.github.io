@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/[...path].ts": {
+    "api/[...path].js": {
       "maxDuration": 60
     }
   },
