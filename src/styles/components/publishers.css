@@ -1,5 +1,6 @@
 .publishers-section {
   padding: 64px 0;
+  margin-top: clamp(60px, 6vw, 100px);
   background: var(--color-bg-alt);
 }
 
@@ -108,7 +109,6 @@
   .publishers-section {
     padding: 48px 0;
   }
-
   .publishers-header {
     margin-bottom: 32px;
   }

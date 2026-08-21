@@ -64,7 +64,7 @@ watch(
     id="publishers"
     v-reveal
     aria-labelledby="publishers-title"
-    class="publishers-section diagonal--top-ltr diagonal-padding--both"
+    class="publishers-section diagonal--top-rtl diagonal-padding--both"
   >
     <div class="container">
       <header class="publishers-header">
