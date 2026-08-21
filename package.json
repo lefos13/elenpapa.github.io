@@ -12,7 +12,7 @@
     "backoffice": "node --watch --watch-path=backoffice backoffice/server.mjs",
     "backoffice:host": "cross-env BACKOFFICE_HOST=0.0.0.0 node --watch --watch-path=backoffice --watch-path=public/content --watch-path=public/images --watch-path=scripts backoffice/server.mjs",
     "build": "npm run build:api && npm run generate-og && npm run generate-sitemap && run-p type-check \"build-only {@}\" --",
-    "build:api": "esbuild server/router.ts --bundle --platform=node --format=esm --target=node22 --external:@octokit/rest --external:jose --external:sharp --external:zod --external:@vercel/node --outfile=api/[...path].js",
+    "build:api": "esbuild server/router.ts --bundle --platform=node --format=esm --target=node22 --external:@octokit/rest --external:jose --external:sharp --external:zod --external:@vercel/node --outfile=api/index.js",
     "build:ssg": "cross-env VITE_SSG=true vite-ssg build",
     "preview": "vite preview",
     "serve": "node server.js",

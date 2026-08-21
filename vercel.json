@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/[...path].js": {
+    "api/index.js": {
       "maxDuration": 60
     }
   },
@@ -142,11 +142,11 @@
     },
     {
       "source": "/api/(.*)",
-      "destination": "/api/[...path]"
+      "destination": "/api/index.js"
     },
     {
       "source": "/api",
-      "destination": "/api/[...path]"
+      "destination": "/api/index.js"
     },
     {
       "source": "/((?!api|backoffice|admin|assets|images|content|.*\\..*).*)",
