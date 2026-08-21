@@ -9,6 +9,7 @@ export function renderImagesLibrary({
   isSectionCollapsed,
   setSectionCollapsed,
   onOpenUsage,
+  onPreviewImage,
 }) {
   mount.innerHTML = ''
 
@@ -61,8 +62,12 @@ export function renderImagesLibrary({
         preview.src = image.publicPath
         preview.alt = image.name
         preview.loading = 'lazy'
+        preview.title = 'Click to open full-resolution preview'
+        if (typeof onPreviewImage === 'function') {
+          preview.style.cursor = 'pointer'
+          preview.addEventListener('click', () => onPreviewImage(image))
+        }
         card.append(preview)
-
         const body = document.createElement('div')
         body.className = 'image-meta'
         body.innerHTML = `

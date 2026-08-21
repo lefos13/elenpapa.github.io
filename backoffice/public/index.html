@@ -13,12 +13,22 @@
   </head>
   <body>
     <div class="layout">
-      <aside class="sidebar">
-        <h1>Backoffice</h1>
-        <p>Edit JSON content files used by the portfolio website.</p>
+      <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-brand">
+            <h1>Backoffice</h1>
+            <p>Edit JSON content files used by the portfolio website.</p>
+          </div>
+          <button id="sidebar-collapse-btn" class="sidebar-collapse-btn" type="button" aria-label="Toggle sidebar" title="Toggle sidebar">
+            <span class="collapse-icon" aria-hidden="true">◀</span>
+          </button>
+        </div>
         <div class="mode-switch">
           <button id="mode-content" class="is-active" type="button">Content</button>
           <button id="mode-images" type="button">Images</button>
+        </div>
+        <div class="sidebar-search">
+          <input id="file-search" type="search" placeholder="Search files... (/)" aria-label="Search content files" />
         </div>
         <button id="refresh-files" type="button">Refresh files</button>
         <ul id="file-list" class="file-list"></ul>
@@ -26,23 +36,77 @@
 
       <main class="workspace">
         <header class="toolbar">
-          <div class="toolbar-title">
-            <h2 id="current-file">Choose a file</h2>
-            <p id="current-usage" class="current-usage">Usage details will appear here.</p>
-            <p id="status-text">Load a JSON file from the left panel.</p>
+          <div class="toolbar-left">
+            <div class="toolbar-file-info">
+              <h2 id="current-file">Choose a file</h2>
+              <span id="current-usage" class="current-usage">Usage details will appear here.</span>
+            </div>
+            <div id="editor-mode-switch" class="editor-mode-switch" hidden>
+              <button id="editor-mode-guided" class="is-active" type="button">Guided</button>
+              <button id="editor-mode-json" type="button">Advanced</button>
+            </div>
           </div>
-          <div class="toolbar-right">
-            <div id="session-user" class="session-user" hidden>
-              <span id="session-username" class="session-username">Admin</span>
-              <button id="logout-button" class="logout-button" type="button">Logout</button>
+
+          <div class="toolbar-center">
+            <div class="git-status-pill" id="git-status-pill" title="Git Repository Status">
+              <span class="git-status-dot" aria-hidden="true"></span>
+              <p id="git-status-text">Git: loading...</p>
+              <button id="refresh-git-status" type="button" class="btn-icon-refresh" title="Refresh git status" aria-label="Refresh git">↻</button>
             </div>
             <div id="status-strip" class="status-strip" data-status="ready" aria-live="polite">
               <span id="status-icon" class="status-icon" aria-hidden="true">●</span>
               <span id="status-label">Ready</span>
             </div>
-            <div id="editor-mode-switch" class="editor-mode-switch" hidden>
-              <button id="editor-mode-guided" class="is-active" type="button">Guided</button>
-              <button id="editor-mode-json" type="button">Advanced</button>
+          </div>
+
+          <div class="toolbar-right">
+            <div class="toolbar-editor-actions">
+              <button id="reload-file" type="button" class="btn-toolbar-action" disabled title="Reload from disk (⌘R)">Reload</button>
+              <button id="save-file" type="button" class="btn-toolbar-save" disabled title="Save changes (⌘S)">Save</button>
+              <button id="open-review-flow" type="button" class="btn-toolbar-review" disabled title="Create review branch and publish">Publish / Review</button>
+            </div>
+            <div class="toolbar-divider" aria-hidden="true"></div>
+            <button id="cmd-palette-btn" class="cmd-palette-btn" type="button" title="Command Palette (Cmd+K / Ctrl+K)" aria-label="Command Palette">
+              <span class="cmd-palette-icon">⌘K</span>
+            </button>
+            <div class="settings-menu-container">
+              <button id="settings-menu-btn" class="btn-settings-toggle" type="button" aria-haspopup="true" aria-expanded="false" title="Settings & Account">
+                <span class="settings-gear-icon" aria-hidden="true">⚙</span>
+                <span id="session-user" class="session-user" hidden>
+                  <span class="settings-user-avatar" id="settings-user-avatar">A</span>
+                </span>
+              </button>
+              <div id="settings-dropdown" class="settings-dropdown" hidden role="menu" aria-label="Settings and account menu">
+                <div class="settings-dropdown-header">
+                  <div class="settings-user-avatar-lg" id="settings-user-avatar-lg">A</div>
+                  <div class="settings-user-details">
+                    <span class="settings-user-name" id="session-username">Admin</span>
+                    <span class="settings-user-role">Administrator</span>
+                  </div>
+                </div>
+                <div class="settings-dropdown-section">
+                  <span class="settings-section-title">Appearance</span>
+                  <div id="theme-switcher" class="theme-switcher" role="group" aria-label="Theme switcher">
+                    <button type="button" class="theme-btn" data-theme-value="light" title="Light theme" aria-pressed="false">Light</button>
+                    <button type="button" class="theme-btn" data-theme-value="dark" title="Dark theme" aria-pressed="false">Dark</button>
+                    <button type="button" class="theme-btn is-active" data-theme-value="system" title="System theme" aria-pressed="true">System</button>
+                  </div>
+                </div>
+                <div class="settings-dropdown-section">
+                  <span class="settings-section-title">Quick Actions</span>
+                  <div class="settings-action-list">
+                    <button type="button" id="menu-refresh-git" class="settings-menu-item">
+                      <span>↻ Refresh Git Status</span>
+                    </button>
+                    <button type="button" id="menu-refresh-files" class="settings-menu-item">
+                      <span>📁 Refresh Content Files</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="settings-dropdown-footer">
+                  <button id="logout-button" class="btn-menu-logout" type="button">Sign Out</button>
+                </div>
+              </div>
             </div>
           </div>
         </header>
@@ -67,19 +131,6 @@
         </section>
       </main>
     </div>
-    <aside id="session-banner" class="session-banner">
-      <div class="session-actions">
-        <button id="reload-file" type="button" disabled>Reload</button>
-        <button id="save-file" type="button" disabled>Save</button>
-      </div>
-      <div class="git-status">
-        <p id="git-status-text">Git status: loading...</p>
-        <button id="refresh-git-status" type="button">Refresh git</button>
-      </div>
-      <div class="review-actions">
-        <button id="open-review-flow" type="button" disabled>Create Review Branch</button>
-      </div>
-    </aside>
 
     <dialog id="login-modal" class="modal login-modal" aria-labelledby="login-modal-title" hidden>
       <div class="modal-panel login-panel">
@@ -119,19 +170,17 @@
       </div>
     </dialog>
 
-    <div id="review-modal" class="modal" hidden>
-      <div class="modal-panel">
-        <h3>Review Changes</h3>
-        <p>Preview of changes from this backoffice session.</p>
+    <div id="review-modal" class="modal review-modal" hidden>
+      <div class="modal-panel review-modal-panel">
+        <div class="review-modal-header">
+          <h3>Review Changes</h3>
+          <p class="review-modal-subtitle">Preview changes from this backoffice session before creating a review branch.</p>
+        </div>
         <p id="review-error-text" class="modal-error" hidden></p>
-        <h4>Content change summary</h4>
-        <ul id="review-semantic-list" class="review-list review-semantic-list"></ul>
-        <h4>Raw git summary</h4>
-        <pre id="review-summary" class="modal-summary"></pre>
-        <ul id="review-changes-list" class="review-list"></ul>
-        <div class="modal-actions">
+        <div id="review-diff-container" class="review-diff-container"></div>
+        <div class="modal-actions review-modal-actions">
           <button id="cancel-review-flow" type="button">Cancel</button>
-          <button id="finalize-review-flow" type="button">Finalize & Push</button>
+          <button id="finalize-review-flow" type="button" class="btn-primary">Finalize & Push</button>
         </div>
       </div>
     </div>
@@ -154,6 +203,78 @@
         </div>
       </div>
     </div>
+
+    <dialog id="media-picker-modal" class="modal media-picker-modal" aria-labelledby="media-picker-title" hidden>
+      <div class="modal-panel media-picker-panel">
+        <div class="media-picker-header">
+          <h3 id="media-picker-title">Choose from Media Library</h3>
+          <button type="button" class="btn-close-modal" id="media-picker-close" aria-label="Close dialog">✕</button>
+        </div>
+        <div class="media-picker-search-bar">
+          <input type="search" class="media-picker-search" placeholder="Search images by name, section, or path..." aria-label="Search images" />
+        </div>
+        <div class="media-picker-body">
+          <div class="media-picker-grid" role="listbox" aria-label="Available images"></div>
+          <div class="media-picker-empty" hidden>No images found matching your search.</div>
+        </div>
+        <div class="media-picker-footer modal-actions">
+          <div class="media-picker-selection-info">
+            <span class="media-picker-selected-label">Selected:</span>
+            <code class="media-picker-selected-path">None</code>
+          </div>
+          <div class="media-picker-actions">
+            <button type="button" class="btn-cancel" id="media-picker-cancel">Cancel</button>
+            <button type="button" class="btn-primary btn-media-select" id="media-picker-select" disabled>Select Image</button>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="image-lightbox-modal" class="modal image-lightbox-modal" aria-labelledby="image-lightbox-title" hidden>
+      <div class="image-lightbox-content">
+        <div class="image-lightbox-header">
+          <h3 id="image-lightbox-title" class="image-lightbox-title">Image Preview</h3>
+          <button type="button" class="btn-close-lightbox" id="image-lightbox-close" aria-label="Close lightbox">✕</button>
+        </div>
+        <div class="image-lightbox-view">
+          <img id="image-lightbox-img" class="image-lightbox-img" src="" alt="Full preview" />
+        </div>
+        <div id="image-lightbox-meta" class="image-lightbox-meta">
+          <div class="image-lightbox-details">
+            <span class="image-lightbox-dimension" id="image-lightbox-dimension">Loading dimensions...</span>
+            <span class="image-lightbox-size" id="image-lightbox-size"></span>
+            <span class="image-lightbox-section" id="image-lightbox-section"></span>
+            <code class="image-lightbox-path" id="image-lightbox-path"></code>
+          </div>
+          <div class="image-lightbox-actions">
+            <button type="button" class="btn-copy-path" id="image-lightbox-copy">Copy Path</button>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="command-palette-modal" class="modal command-palette-modal" aria-labelledby="command-palette-title" hidden>
+      <div class="modal-panel command-palette-panel">
+        <div class="command-palette-search-wrap">
+          <span class="command-palette-search-icon" aria-hidden="true">🔍</span>
+          <input
+            id="command-palette-input"
+            class="command-palette-input"
+            type="text"
+            placeholder="Type a command or search files... (Esc to close)"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Command search"
+          />
+        </div>
+        <ul id="command-palette-list" class="command-palette-list" role="listbox" aria-label="Commands and files"></ul>
+        <div class="command-palette-footer">
+          <span><kbd>↑</kbd> <kbd>↓</kbd> to navigate</span>
+          <span><kbd>↵</kbd> to select</span>
+          <span><kbd>esc</kbd> to close</span>
+        </div>
+      </div>
+    </dialog>
     <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
     <script src="/backoffice/js/main.js" type="module"></script>
   </body>

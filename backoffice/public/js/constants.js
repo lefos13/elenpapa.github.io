@@ -86,3 +86,16 @@ export function getFileUsageLabel(filePath) {
   if (!usage || usage.length === 0) return 'Usage: not documented'
   return `Usage: ${usage.join(' • ')}`
 }
+
+export const FILE_CATEGORIES = {
+  'Pages & Site': ['site.json', 'home.json'],
+  'Portfolio & Works': ['book.json', 'moonlight.json', 'painted-books.json', 'timeline.json'],
+  'Editorial & Inquiries': ['posts.json', 'services.json', 'publishers.json', 'contact.json'],
+}
+
+export function getCategoryForFile(filename) {
+  for (const [category, files] of Object.entries(FILE_CATEGORIES)) {
+    if (files.includes(filename)) return category
+  }
+  return 'Other'
+}

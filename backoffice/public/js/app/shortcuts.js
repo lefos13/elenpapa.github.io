@@ -15,7 +15,7 @@ function isTypingTarget(target) {
   )
 }
 
-export function bindShortcuts({ onSave, onReload, onCloseModal, onFocusSearch }) {
+export function bindShortcuts({ onSave, onReload, onCloseModal, onFocusSearch, onToggleCommandPalette }) {
   function handler(event) {
     const metaOrCtrl = event.metaKey || event.ctrlKey
     const key = event.key.toLowerCase()
@@ -25,6 +25,12 @@ export function bindShortcuts({ onSave, onReload, onCloseModal, onFocusSearch })
       onSave?.()
       return
     }
+    if (metaOrCtrl && key === 'k') {
+      event.preventDefault()
+      onToggleCommandPalette?.()
+      return
+    }
+
 
     if (metaOrCtrl && key === 'r') {
       event.preventDefault()

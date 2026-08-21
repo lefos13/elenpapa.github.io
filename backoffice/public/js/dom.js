@@ -5,6 +5,9 @@
  */
 export function getElements() {
   return {
+    sidebar: document.querySelector('#sidebar'),
+    sidebarCollapseBtn: document.querySelector('#sidebar-collapse-btn'),
+    fileSearch: document.querySelector('#file-search'),
     fileList: document.querySelector('#file-list'),
     refreshFiles: document.querySelector('#refresh-files'),
     modeContent: document.querySelector('#mode-content'),
@@ -21,6 +24,19 @@ export function getElements() {
     sessionUser: document.querySelector('#session-user'),
     sessionUsername: document.querySelector('#session-username'),
     logoutButton: document.querySelector('#logout-button'),
+    settingsMenuBtn: document.querySelector('#settings-menu-btn'),
+    settingsDropdown: document.querySelector('#settings-dropdown'),
+    settingsUserAvatar: document.querySelector('#settings-user-avatar'),
+    settingsUserAvatarLg: document.querySelector('#settings-user-avatar-lg'),
+    menuRefreshGit: document.querySelector('#menu-refresh-git'),
+    menuRefreshFiles: document.querySelector('#menu-refresh-files'),
+    gitStatusPill: document.querySelector('#git-status-pill'),
+    cmdPaletteBtn: document.querySelector('#cmd-palette-btn'),
+    commandPaletteModal: document.querySelector('#command-palette-modal'),
+    commandPaletteInput: document.querySelector('#command-palette-input'),
+    commandPaletteList: document.querySelector('#command-palette-list'),
+    themeSwitcher: document.querySelector('#theme-switcher'),
+    themeButtons: document.querySelectorAll('#theme-switcher [data-theme-value]'),
     editorModeSwitch: document.querySelector('#editor-mode-switch'),
     editorModeGuided: document.querySelector('#editor-mode-guided'),
     editorModeJson: document.querySelector('#editor-mode-json'),
@@ -31,6 +47,7 @@ export function getElements() {
     openReviewFlow: document.querySelector('#open-review-flow'),
     reviewModal: document.querySelector('#review-modal'),
     reviewErrorText: document.querySelector('#review-error-text'),
+    reviewDiffContainer: document.querySelector('#review-diff-container'),
     reviewSemanticList: document.querySelector('#review-semantic-list'),
     reviewSummary: document.querySelector('#review-summary'),
     reviewChangesList: document.querySelector('#review-changes-list'),
@@ -52,5 +69,7 @@ export function getElements() {
     imagesRoot: document.querySelector('#images-root'),
     emptyState: document.querySelector('#empty-state'),
     toastRoot: document.querySelector('#toast-root'),
+    mediaPickerModal: document.querySelector('#media-picker-modal'),
+    imageLightboxModal: document.querySelector('#image-lightbox-modal'),
   }
 }

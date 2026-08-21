@@ -19,7 +19,12 @@ import {
   uploadImageAsset,
   validateFileContent,
 } from './api.js'
-import { getFileUsageLabel } from './constants.js'
+import {
+  FILE_CATEGORIES,
+  FILE_USAGE_REFERENCES,
+  getCategoryForFile,
+  getFileUsageLabel,
+} from './constants.js'
 import { bindShortcuts } from './app/shortcuts.js'
 import { saveDraft, loadDraft, clearDraft } from './app/draft-recovery.js'
 import { createToastController } from './app/toasts.js'
@@ -33,11 +38,14 @@ import {
   stageContentChange,
 } from './app/session-changes.js'
 import { UiStatusState, getStatusView } from './app/ui-status.js'
+import { initTheme, setTheme } from './app/theme.js'
+import { createCommandPalette } from './app/command-palette.js'
 import { createState, isSectionCollapsed, setSectionCollapsed } from './state.js'
 import { areValuesEqual, cloneValue, toRepoPathFromPublicImagePath } from './utils.js'
 import { renderContentEditor } from './views/content-editor.js'
 import { renderGuidedContentEditor } from './features/content/guided-editor.js'
 import { renderImagesLibrary } from './features/images/library.js'
+import { renderVisualDiffViewer } from './features/review/visual-diff.js'
 
 export function createBackofficeApp(elements) {
   const state = createState()
@@ -47,12 +55,173 @@ export function createBackofficeApp(elements) {
   let draftPersistTimer = null
   let reviewCanFinalize = false
   const gitBusyByAction = new Map()
+
+  const commandPalette = createCommandPalette({
+    modal: elements.commandPaletteModal,
+    input: elements.commandPaletteInput,
+    list: elements.commandPaletteList,
+    getCommands: () => {
+      const commands = []
+
+      state.files.forEach((file) => {
+        commands.push({
+          id: `file:${file}`,
+          title: `Open ${file}`,
+          category: 'Files',
+          subtitle: getFileUsageLabel(file),
+          keywords: [file, getFileUsageLabel(file), getCategoryForFile(file)],
+          action: () => openFile(file),
+        })
+      })
+
+      commands.push({
+        id: 'action:save',
+        title: 'Save Active File',
+        category: 'Actions',
+        subtitle: state.activeFile ? `Save changes to ${state.activeFile}` : 'No active file',
+        shortcut: '⌘S',
+        keywords: ['save', 'persist', 'write'],
+        action: async () => {
+          if (!elements.saveFile.disabled) {
+            elements.saveFile.click()
+          }
+        },
+      })
+
+      commands.push({
+        id: 'action:review',
+        title: 'Review & Finalize Changes',
+        category: 'Actions',
+        subtitle: 'Preview changes and create review branch',
+        keywords: ['review', 'finalize', 'git', 'publish', 'branch', 'pr'],
+        action: async () => {
+          if (!elements.openReviewFlow.disabled) {
+            elements.openReviewFlow.click()
+          }
+        },
+      })
+
+      commands.push({
+        id: 'action:reload',
+        title: 'Reload Active File',
+        category: 'Actions',
+        subtitle: 'Discard unsaved changes and reload from disk',
+        shortcut: '⌘R',
+        keywords: ['reload', 'revert', 'reset'],
+        action: async () => {
+          if (!elements.reloadFile.disabled) {
+            elements.reloadFile.click()
+          }
+        },
+      })
+
+      commands.push({
+        id: 'action:refresh-files',
+        title: 'Refresh Files List',
+        category: 'Actions',
+        keywords: ['refresh', 'files'],
+        action: () => elements.refreshFiles.click(),
+      })
+
+      commands.push({
+        id: 'action:refresh-git',
+        title: 'Refresh Git Status',
+        category: 'Actions',
+        keywords: ['git', 'status', 'fetch', 'pull'],
+        action: () => elements.refreshGitStatus.click(),
+      })
+
+      commands.push({
+        id: 'view:content',
+        title: 'View Content Files',
+        category: 'Views & Modes',
+        keywords: ['content', 'json', 'editor'],
+        action: () => elements.modeContent.click(),
+      })
+
+      commands.push({
+        id: 'view:images',
+        title: 'View Media Library',
+        category: 'Views & Modes',
+        keywords: ['images', 'media', 'library', 'assets', 'photos'],
+        action: () => elements.modeImages.click(),
+      })
+
+      commands.push({
+        id: 'mode:guided',
+        title: 'Switch to Guided Mode',
+        category: 'Views & Modes',
+        keywords: ['guided', 'form', 'simple'],
+        action: () => elements.editorModeGuided.click(),
+      })
+
+      commands.push({
+        id: 'mode:advanced',
+        title: 'Switch to Advanced (JSON Tree) Mode',
+        category: 'Views & Modes',
+        keywords: ['advanced', 'json', 'tree', 'raw'],
+        action: () => elements.editorModeJson.click(),
+      })
+
+      commands.push({
+        id: 'theme:light',
+        title: 'Theme: Light',
+        category: 'Appearance',
+        keywords: ['theme', 'light', 'white'],
+        action: () => setTheme('light'),
+      })
+
+      commands.push({
+        id: 'theme:dark',
+        title: 'Theme: Dark',
+        category: 'Appearance',
+        keywords: ['theme', 'dark', 'night', 'black'],
+        action: () => setTheme('dark'),
+      })
+
+      commands.push({
+        id: 'theme:system',
+        title: 'Theme: System Default',
+        category: 'Appearance',
+        keywords: ['theme', 'system', 'auto'],
+        action: () => setTheme('system'),
+      })
+
+      return commands
+    },
+  })
   const DEFAULT_BUTTON_LABELS = {
     refresh: 'Refresh git',
     preview: 'Create Review Branch',
     finalize: 'Finalize & Push',
   }
 
+  const SIDEBAR_COLLAPSED_KEY = 'backoffice:sidebar-collapsed'
+
+  function isFileDirty(filePath) {
+    if (filePath === state.activeFile && state.dirty) return true
+    if (sessionChanges?.contentByFile?.has(filePath)) return true
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith(`backoffice:draft:${filePath}:`)) return true
+    }
+    return false
+  }
+
+  function initSidebarCollapse() {
+    const isCollapsed = localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true'
+    const layoutEl = document.querySelector('.layout')
+    if (layoutEl && isCollapsed) {
+      layoutEl.classList.add('sidebar-collapsed')
+    }
+  }
+
+  function toggleSidebarCollapse() {
+    const layoutEl = document.querySelector('.layout')
+    if (!layoutEl) return
+    const isCollapsed = layoutEl.classList.toggle('sidebar-collapsed')
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(isCollapsed))
+  }
   function normalizeStatusMode(mode) {
     if (!mode) return UiStatusState.READY
     if (mode === 'dirty') return UiStatusState.UNSAVED
@@ -66,11 +235,20 @@ export function createBackofficeApp(elements) {
     const stateKey = nextState || UiStatusState.READY
     const view = getStatusView(stateKey)
 
-    elements.statusText.textContent = message || view.label
-    elements.statusText.className = `status-${stateKey}`
-    elements.statusStrip.dataset.status = stateKey
-    elements.statusIcon.textContent = view.icon
-    elements.statusLabel.textContent = view.label
+    if (elements.statusText) {
+      elements.statusText.textContent = message || view.label
+      elements.statusText.className = `status-${stateKey}`
+    }
+    if (elements.statusStrip) {
+      elements.statusStrip.dataset.status = stateKey
+    }
+    if (elements.statusIcon) {
+      elements.statusIcon.textContent = view.icon
+    }
+    if (elements.statusLabel) {
+      elements.statusLabel.textContent = message || view.label
+      elements.statusLabel.title = message || view.label
+    }
   }
 
   function setGitBusy(nextBusy, action = 'general') {
@@ -99,7 +277,20 @@ export function createBackofficeApp(elements) {
     }
   }
 
-  function formatGitStatusText(status) {
+  function formatGitStatusCompact(status) {
+    if (!status) return 'Git: offline'
+    const branch = status.currentBranch || 'main'
+    const changeCount = status.changeCount || 0
+    if (changeCount > 0) {
+      return `${branch} · ${changeCount} change${changeCount === 1 ? '' : 's'}`
+    }
+    if (status.mainAhead) {
+      return `${branch} · ${status.mainAhead} ahead`
+    }
+    return `${branch} · clean`
+  }
+
+  function formatGitStatusDetailed(status) {
     if (!status) return 'Repository status unavailable.'
 
     const syncLabelByAction = {
@@ -123,7 +314,18 @@ export function createBackofficeApp(elements) {
   }
 
   function renderGitStatus() {
-    elements.gitStatusText.textContent = formatGitStatusText(state.gitStatus)
+    if (elements.gitStatusText) {
+      elements.gitStatusText.textContent = formatGitStatusCompact(state.gitStatus)
+      elements.gitStatusText.title = formatGitStatusDetailed(state.gitStatus)
+    }
+    if (elements.gitStatusPill) {
+      elements.gitStatusPill.title = formatGitStatusDetailed(state.gitStatus)
+    }
+    if (elements.openReviewFlow) {
+      const changeCount = state.gitStatus?.changeCount || 0
+      elements.openReviewFlow.textContent =
+        changeCount > 0 ? `Review (${changeCount})` : 'Publish / Review'
+    }
   }
 
   function markSessionPath(repoPath) {
@@ -158,14 +360,17 @@ export function createBackofficeApp(elements) {
 
   function setSessionUser(user) {
     if (elements.sessionUser) {
-      if (user) {
-        elements.sessionUser.hidden = false
-        if (elements.sessionUsername) {
-          elements.sessionUsername.textContent = user
-        }
-      } else {
-        elements.sessionUser.hidden = true
-      }
+      elements.sessionUser.hidden = !user
+    }
+    if (elements.sessionUsername) {
+      elements.sessionUsername.textContent = user || 'Admin'
+    }
+    const initial = user ? String(user).charAt(0).toUpperCase() : 'A'
+    if (elements.settingsUserAvatar) {
+      elements.settingsUserAvatar.textContent = initial
+    }
+    if (elements.settingsUserAvatarLg) {
+      elements.settingsUserAvatarLg.textContent = initial
     }
   }
 
@@ -312,54 +517,49 @@ export function createBackofficeApp(elements) {
     }, 250)
   }
 
-  function renderReviewPreview(preview, sessionSummary) {
+  function renderReviewPreview(preview) {
     clearReviewError()
-    elements.reviewSummary.textContent = preview.summary || 'No diff summary available.'
-    elements.reviewChangesList.innerHTML = ''
-    elements.reviewSemanticList.innerHTML = ''
-
-    const semanticEntries = []
-    state.sessionSemanticChanges.forEach((entries, filePath) => {
-      entries.forEach((entry) => {
-        semanticEntries.push({
-          filePath,
-          ...entry,
-        })
-      })
-    })
-
-    if (semanticEntries.length) {
-      semanticEntries.forEach((entry) => {
-        const item = document.createElement('li')
-        item.textContent = `${entry.filePath}: ${entry.path || 'root'} (${entry.label}) ${entry.before ? `from "${entry.before}"` : ''}${entry.after ? ` to "${entry.after}"` : ''}`
-        elements.reviewSemanticList.append(item)
-      })
-    } else {
-      const fallback = document.createElement('li')
-      fallback.textContent = 'No field-level summary captured yet. Saved files will appear here.'
-      elements.reviewSemanticList.append(fallback)
+    if (elements.reviewSummary) {
+      elements.reviewSummary.textContent = preview?.summary || 'No diff summary available.'
+    }
+    if (elements.reviewChangesList) {
+      elements.reviewChangesList.innerHTML = ''
+    }
+    if (elements.reviewSemanticList) {
+      elements.reviewSemanticList.innerHTML = ''
     }
 
-    if (sessionSummary?.pendingTempUploads?.dangling?.length) {
-      const tempNotice = document.createElement('li')
-      tempNotice.textContent = `Pending temp uploads to discard before push: ${sessionSummary.pendingTempUploads.dangling.length}`
-      elements.reviewSemanticList.append(tempNotice)
+    if (elements.reviewDiffContainer) {
+      renderVisualDiffViewer({
+        container: elements.reviewDiffContainer,
+        semanticChanges: state.sessionSemanticChanges,
+        rawDiff: preview?.summary || preview || '',
+        sessionChanges,
+      })
     }
 
-    if (!preview.entries.length) {
-      const empty = document.createElement('li')
-      empty.textContent = 'No tracked changes found for this session.'
-      elements.reviewChangesList.append(empty)
+    const hasSemanticChanges = state.sessionSemanticChanges && state.sessionSemanticChanges.size > 0
+    const hasPreviewEntries = Boolean(preview?.entries && preview.entries.length > 0)
+    const hasSessionPaths = state.sessionTouchedPaths && state.sessionTouchedPaths.size > 0
+
+    if (!hasPreviewEntries && !hasSemanticChanges && !hasSessionPaths) {
+      if (elements.reviewChangesList) {
+        const empty = document.createElement('li')
+        empty.textContent = 'No tracked changes found for this session.'
+        elements.reviewChangesList.append(empty)
+      }
       reviewCanFinalize = false
       syncToolbarState()
       return
     }
 
-    preview.entries.forEach((entry) => {
-      const item = document.createElement('li')
-      item.textContent = `${entry.code} ${entry.path}`
-      elements.reviewChangesList.append(item)
-    })
+    if (elements.reviewChangesList && preview?.entries) {
+      preview.entries.forEach((entry) => {
+        const item = document.createElement('li')
+        item.textContent = `${entry.code} ${entry.path}`
+        elements.reviewChangesList.append(item)
+      })
+    }
 
     reviewCanFinalize = true
     syncToolbarState()
@@ -401,35 +601,117 @@ export function createBackofficeApp(elements) {
     }
 
     elements.fileList.hidden = false
-    state.files.forEach((filePath) => {
+
+    const searchTerm = (elements.fileSearch?.value || '').trim().toLowerCase()
+
+    // Filter files based on searchTerm (matching filename, title, or usage text)
+    const filteredFiles = state.files.filter((filePath) => {
+      if (!searchTerm) return true
       const descriptor = state.fileDescriptors.find((entry) => entry.file === filePath)
-      const listItem = document.createElement('li')
-      const button = document.createElement('button')
-      button.type = 'button'
-      button.classList.toggle('is-active', filePath === state.activeFile)
-
-      const title = document.createElement('span')
-      title.className = 'file-item-title'
-      title.textContent = filePath
-
-      const usage = document.createElement('span')
-      usage.className = 'file-item-usage'
-      usage.textContent = descriptor?.usage?.length
-        ? `Usage: ${descriptor.usage.join(' • ')}`
-        : getFileUsageLabel(filePath)
-
-      const meta = document.createElement('span')
-      meta.className = 'file-item-usage'
-      const bytes = descriptor?.sizeBytes
-      const updatedAt = descriptor?.updatedAt
-      const unsavedTag = filePath === state.activeFile && state.dirty ? ' • Unsaved changes' : ''
-      meta.textContent = `${bytes ? `Size: ${(bytes / 1024).toFixed(1)} KB` : ''}${updatedAt ? ` • Updated: ${new Date(updatedAt).toLocaleString()}` : ''}${unsavedTag}`
-
-      button.append(title, usage, meta)
-      button.addEventListener('click', () => openFile(filePath))
-      listItem.append(button)
-      elements.fileList.append(listItem)
+      const usageText = descriptor?.usage?.length
+        ? descriptor.usage.join(' ')
+        : (FILE_USAGE_REFERENCES?.[filePath] || []).join(' ')
+      const searchTarget = `${filePath} ${usageText}`.toLowerCase()
+      return searchTarget.includes(searchTerm)
     })
+
+    // Group filtered files by category
+    const categoryNames = Object.keys(FILE_CATEGORIES)
+    const grouped = new Map()
+    categoryNames.forEach((cat) => grouped.set(cat, []))
+    grouped.set('Other', [])
+
+    filteredFiles.forEach((filePath) => {
+      const category = getCategoryForFile(filePath)
+      if (grouped.has(category)) {
+        grouped.get(category).push(filePath)
+      } else {
+        grouped.get('Other').push(filePath)
+      }
+    })
+
+    let totalRendered = 0
+
+    function renderCategory(categoryName, filesInCategory) {
+      if (filesInCategory.length === 0 && searchTerm) {
+        return
+      }
+
+      const categorySection = document.createElement('li')
+      categorySection.className = 'file-category'
+
+      const categoryTitle = document.createElement('div')
+      categoryTitle.className = 'file-category-title'
+
+      const titleLabel = document.createElement('span')
+      titleLabel.textContent = categoryName
+
+      const countBadge = document.createElement('span')
+      countBadge.className = 'file-category-count'
+      countBadge.textContent = String(filesInCategory.length)
+
+      categoryTitle.append(titleLabel, countBadge)
+      categorySection.append(categoryTitle)
+
+      const categoryList = document.createElement('ul')
+      categoryList.className = 'file-category-list'
+
+      filesInCategory.forEach((filePath) => {
+        totalRendered += 1
+        const descriptor = state.fileDescriptors.find((entry) => entry.file === filePath)
+        const listItem = document.createElement('li')
+        const button = document.createElement('button')
+        button.type = 'button'
+        button.classList.toggle('is-active', filePath === state.activeFile)
+        button.setAttribute('title', filePath)
+
+        const headerRow = document.createElement('div')
+        headerRow.className = 'file-item-header'
+
+        const title = document.createElement('span')
+        title.className = 'file-item-title'
+        title.textContent = filePath
+        headerRow.append(title)
+
+        const dirty = isFileDirty(filePath)
+        if (dirty) {
+          const dirtyDot = document.createElement('span')
+          dirtyDot.className = 'file-item-dirty'
+          dirtyDot.textContent = '●'
+          dirtyDot.setAttribute('title', 'Unsaved changes')
+          dirtyDot.setAttribute('aria-label', 'Unsaved changes')
+          headerRow.append(dirtyDot)
+        }
+
+        const usage = document.createElement('span')
+        usage.className = 'file-item-usage'
+        usage.textContent = descriptor?.usage?.length
+          ? `Usage: ${descriptor.usage.join(' • ')}`
+          : getFileUsageLabel(filePath)
+
+        button.append(headerRow, usage)
+        button.addEventListener('click', () => openFile(filePath))
+        listItem.append(button)
+        categoryList.append(listItem)
+      })
+
+      categorySection.append(categoryList)
+      elements.fileList.append(categorySection)
+    }
+
+    categoryNames.forEach((name) => renderCategory(name, grouped.get(name) || []))
+
+    const otherFiles = grouped.get('Other') || []
+    if (otherFiles.length > 0) {
+      renderCategory('Other', otherFiles)
+    }
+
+    if (totalRendered === 0 && searchTerm) {
+      const emptyItem = document.createElement('li')
+      emptyItem.className = 'file-category-title'
+      emptyItem.textContent = `No files matching "${searchTerm}"`
+      elements.fileList.append(emptyItem)
+    }
   }
 
   function renderEditor() {
@@ -452,6 +734,7 @@ export function createBackofficeApp(elements) {
       syncDirtyState()
       syncToolbarState()
       scheduleDraftPersist()
+      renderFileList()
 
       if (state.dirty) {
         setUiStatus(
@@ -469,6 +752,7 @@ export function createBackofficeApp(elements) {
       renderGuidedContentEditor({
         mount: elements.editorRoot,
         value: state.draftValue,
+        baselineValue: state.originalValue,
         activeFile: state.activeFile,
         schema: state.activeSchema,
         validationIssues: state.validationIssues,
@@ -489,6 +773,7 @@ export function createBackofficeApp(elements) {
           }
           return upload
         },
+        fetchImages: (query) => fetchImages(query),
       })
       return
     }
@@ -1086,6 +1371,17 @@ export function createBackofficeApp(elements) {
       }
     })
 
+    if (elements.themeSwitcher) {
+      elements.themeSwitcher.addEventListener('click', (event) => {
+        const btn = event.target.closest('[data-theme-value]')
+        if (!btn) return
+        const selectedTheme = btn.getAttribute('data-theme-value')
+        if (selectedTheme) {
+          setTheme(selectedTheme)
+        }
+      })
+    }
+
     elements.reviewModal.addEventListener('click', (event) => {
       if (event.target !== elements.reviewModal || state.gitBusy) return
       reviewCanFinalize = false
@@ -1097,6 +1393,55 @@ export function createBackofficeApp(elements) {
       if (event.target !== elements.successModal || state.gitBusy) return
       closeModal(elements.successModal)
     })
+    if (elements.sidebarCollapseBtn) {
+      elements.sidebarCollapseBtn.addEventListener('click', toggleSidebarCollapse)
+    }
+
+    if (elements.fileSearch) {
+      elements.fileSearch.addEventListener('input', () => {
+        renderFileList()
+      })
+    }
+    if (elements.cmdPaletteBtn) {
+      elements.cmdPaletteBtn.addEventListener('click', () => {
+        commandPalette.toggle()
+      })
+    }
+    if (elements.settingsMenuBtn && elements.settingsDropdown) {
+      elements.settingsMenuBtn.addEventListener('click', (e) => {
+        e.stopPropagation()
+        const isHidden = elements.settingsDropdown.hidden
+        elements.settingsDropdown.hidden = !isHidden
+        elements.settingsMenuBtn.setAttribute('aria-expanded', String(isHidden))
+      })
+
+      document.addEventListener('click', (e) => {
+        if (
+          elements.settingsDropdown &&
+          !elements.settingsDropdown.hidden &&
+          !elements.settingsDropdown.contains(e.target) &&
+          !elements.settingsMenuBtn.contains(e.target)
+        ) {
+          elements.settingsDropdown.hidden = true
+          elements.settingsMenuBtn.setAttribute('aria-expanded', 'false')
+        }
+      })
+    }
+
+    if (elements.menuRefreshGit) {
+      elements.menuRefreshGit.addEventListener('click', () => {
+        if (elements.settingsDropdown) elements.settingsDropdown.hidden = true
+        if (elements.refreshGitStatus) elements.refreshGitStatus.click()
+      })
+    }
+
+    if (elements.menuRefreshFiles) {
+      elements.menuRefreshFiles.addEventListener('click', () => {
+        if (elements.settingsDropdown) elements.settingsDropdown.hidden = true
+        if (elements.refreshFiles) elements.refreshFiles.click()
+      })
+    }
+
 
     bindShortcuts({
       onSave: async () => {
@@ -1108,6 +1453,15 @@ export function createBackofficeApp(elements) {
         await elements.reloadFile.click()
       },
       onCloseModal: () => {
+        if (elements.settingsDropdown && !elements.settingsDropdown.hidden) {
+          elements.settingsDropdown.hidden = true
+          elements.settingsMenuBtn?.setAttribute('aria-expanded', 'false')
+          return
+        }
+        if (commandPalette.isOpen()) {
+          commandPalette.close()
+          return
+        }
         if (!elements.reviewModal.hidden) {
           reviewCanFinalize = false
           syncToolbarState()
@@ -1119,13 +1473,29 @@ export function createBackofficeApp(elements) {
         }
       },
       onFocusSearch: () => {
-        if (state.mode !== 'images') return
-        elements.imageSearch.focus()
+        if (state.mode === 'images' && elements.imageSearch) {
+          elements.imageSearch.focus()
+          elements.imageSearch.select?.()
+          return
+        }
+        if (elements.fileSearch) {
+          const layoutEl = document.querySelector('.layout')
+          if (layoutEl?.classList.contains('sidebar-collapsed')) {
+            toggleSidebarCollapse()
+          }
+          elements.fileSearch.focus()
+          elements.fileSearch.select?.()
+        }
+      },
+      onToggleCommandPalette: () => {
+        commandPalette.toggle()
       },
     })
   }
 
   async function init() {
+    initTheme()
+    initSidebarCollapse()
     bindEvents()
     try {
       setUiStatus(UiStatusState.READY, 'Checking session...')

@@ -9,8 +9,22 @@ import {
   isLikelyImageField,
   isManagedImagePublicPath,
   makeTemplateFromArray,
+  areValuesEqual,
+  cloneValue,
 } from '../../utils.js'
 import { FIELD_HELP_OVERRIDES, TEMPLATE_OVERRIDES } from '../../schemas/definitions.js'
+import { createMarkdownToolbar, createCharCounter } from './markdown-toolbar.js'
+import { openMediaPickerModal } from '../images/media-picker.js'
+
+function getValueAtPath(obj, pathSegments) {
+  if (!obj || typeof obj !== 'object') return undefined
+  let current = obj
+  for (const segment of pathSegments) {
+    if (current == null) return undefined
+    current = current[segment]
+  }
+  return current
+}
 
 function formatSegment(segment) {
   return /^\d+$/.test(String(segment)) ? `[${segment}]` : `.${segment}`
@@ -84,6 +98,7 @@ function buildFieldErrorNode(messages) {
 export function renderGuidedContentEditor({
   mount,
   value,
+  baselineValue,
   activeFile,
   schema,
   validationIssues,
@@ -91,6 +106,7 @@ export function renderGuidedContentEditor({
   onStatus,
   onMarkImageForDeletion,
   uploadImage,
+  fetchImages,
 }) {
   const validationByPath = indexValidationIssues(validationIssues)
   mount.innerHTML = ''
@@ -147,6 +163,7 @@ export function renderGuidedContentEditor({
     body.append(
       renderGuidedNode({
         nodeValue: value[key],
+        baselineValue,
         keyName: key,
         pathSegments: [key],
         schema,
@@ -159,6 +176,7 @@ export function renderGuidedContentEditor({
         onStatus,
         onMarkImageForDeletion,
         uploadImage,
+        fetchImages,
       }),
     )
 
@@ -169,6 +187,7 @@ export function renderGuidedContentEditor({
 
 function renderGuidedNode({
   nodeValue,
+  baselineValue,
   keyName,
   pathSegments,
   schema,
@@ -178,6 +197,7 @@ function renderGuidedNode({
   onStatus,
   onMarkImageForDeletion,
   uploadImage,
+  fetchImages,
 }) {
   const nodeType = getValueType(nodeValue)
 
@@ -186,14 +206,69 @@ function renderGuidedNode({
     wrapper.className = 'guided-group'
 
     Object.entries(nodeValue).forEach(([childKey, childValue]) => {
-      const fieldPath = formatPath([...pathSegments, childKey])
+      const childPathSegments = [...pathSegments, childKey]
+      const fieldPath = formatPath(childPathSegments)
       const meta = fieldMetaForPath(schema, fieldPath, childKey, childValue)
 
       const row = document.createElement('div')
       row.className = 'guided-row'
+
+      const childType = getValueType(childValue)
+      const isPrimitive = childType !== 'object' && childType !== 'array'
+
+      if (childType === 'array' || childType === 'object') {
+        row.classList.add('guided-row-full', `guided-row-${childType}`)
+      } else if (childType === 'string') {
+        const strVal = String(childValue ?? '')
+        const isMultiline =
+          meta.control === 'textarea' ||
+          meta.control === 'richtext' ||
+          strVal.includes('\n') ||
+          strVal.length > 70
+        const isImage = isLikelyImageField(childKey, strVal)
+
+        if (isMultiline) {
+          row.classList.add('guided-row-full', 'guided-row-textarea')
+        } else if (isImage) {
+          row.classList.add('guided-row-full', 'guided-row-image')
+        } else {
+          row.classList.add('guided-row-short')
+        }
+      } else {
+        row.classList.add('guided-row-short')
+      }
+
       const label = document.createElement('label')
       label.className = 'guided-label'
-      label.textContent = meta.label
+
+      const labelText = document.createElement('span')
+      labelText.className = 'guided-label-text'
+      labelText.textContent = meta.label
+      label.append(labelText)
+
+      const baselineChildValue = getValueAtPath(baselineValue, childPathSegments)
+
+      if (
+        isPrimitive &&
+        baselineValue !== undefined &&
+        baselineValue !== null &&
+        baselineChildValue !== undefined &&
+        !areValuesEqual(childValue, baselineChildValue)
+      ) {
+        const revertBtn = document.createElement('button')
+        revertBtn.type = 'button'
+        revertBtn.className = 'field-revert-btn'
+        revertBtn.title = 'Revert field to saved value'
+        revertBtn.setAttribute('aria-label', 'Revert field')
+        revertBtn.textContent = '↺'
+        revertBtn.addEventListener('click', (e) => {
+          e.preventDefault()
+          nodeValue[childKey] = cloneValue(baselineChildValue)
+          onReplace(nodeValue, { rerender: true })
+        })
+        label.append(revertBtn)
+      }
+
       row.append(label)
 
       if (meta.description) {
@@ -206,8 +281,9 @@ function renderGuidedNode({
       row.append(
         renderGuidedNode({
           nodeValue: childValue,
+          baselineValue,
           keyName: childKey,
-          pathSegments: [...pathSegments, childKey],
+          pathSegments: childPathSegments,
           schema,
           activeFile,
           validationByPath,
@@ -220,7 +296,6 @@ function renderGuidedNode({
           uploadImage,
         }),
       )
-
       const fieldIssues = validationByPath.get(fieldPath)
       if (fieldIssues?.length) {
         row.append(buildFieldErrorNode(fieldIssues))
@@ -236,15 +311,103 @@ function renderGuidedNode({
     const wrapper = document.createElement('div')
     wrapper.className = 'guided-array'
 
+    const arrayHeader = document.createElement('div')
+    arrayHeader.className = 'guided-array-header'
+
+    const countLabel = document.createElement('span')
+    countLabel.className = 'guided-array-count'
+    countLabel.textContent = `${nodeValue.length} item${nodeValue.length === 1 ? '' : 's'}`
+
+    const bulkActions = document.createElement('div')
+    bulkActions.className = 'guided-array-bulk-actions'
+
+    const collapseAllBtn = document.createElement('button')
+    collapseAllBtn.type = 'button'
+    collapseAllBtn.className = 'btn-array-bulk'
+    collapseAllBtn.textContent = 'Collapse All'
+    collapseAllBtn.title = 'Collapse all array items for easy drag & drop'
+    collapseAllBtn.addEventListener('click', () => {
+      wrapper.querySelectorAll('.guided-array-item').forEach((itemEl) => {
+        itemEl.classList.add('is-collapsed')
+        const chevron = itemEl.querySelector('.item-collapse-btn')
+        if (chevron) chevron.textContent = '▶'
+      })
+    })
+
+    const expandAllBtn = document.createElement('button')
+    expandAllBtn.type = 'button'
+    expandAllBtn.className = 'btn-array-bulk'
+    expandAllBtn.textContent = 'Expand All'
+    expandAllBtn.title = 'Expand all array items to edit fields'
+    expandAllBtn.addEventListener('click', () => {
+      wrapper.querySelectorAll('.guided-array-item').forEach((itemEl) => {
+        itemEl.classList.remove('is-collapsed')
+        const chevron = itemEl.querySelector('.item-collapse-btn')
+        if (chevron) chevron.textContent = '▼'
+      })
+    })
+
+    bulkActions.append(collapseAllBtn, expandAllBtn)
+    arrayHeader.append(countLabel, bulkActions)
+    wrapper.append(arrayHeader)
+
     nodeValue.forEach((item, index) => {
       const card = document.createElement('div')
       card.className = 'guided-array-item'
+      card.dataset.index = String(index)
 
       const controls = document.createElement('div')
       controls.className = 'guided-array-controls'
-      const title = document.createElement('span')
-      title.textContent = `Item ${index + 1}`
 
+      const collapseToggle = document.createElement('button')
+      collapseToggle.type = 'button'
+      collapseToggle.className = 'item-collapse-btn'
+      collapseToggle.title = 'Toggle collapse/expand item'
+      collapseToggle.setAttribute('aria-label', 'Toggle collapse')
+      collapseToggle.textContent = '▼'
+      collapseToggle.addEventListener('click', () => {
+        const isCollapsed = card.classList.toggle('is-collapsed')
+        collapseToggle.textContent = isCollapsed ? '▶' : '▼'
+      })
+      const dragHandle = document.createElement('button')
+      dragHandle.type = 'button'
+      dragHandle.className = 'drag-handle'
+      dragHandle.title = 'Drag to reorder'
+      dragHandle.setAttribute('aria-label', 'Drag to reorder')
+      dragHandle.textContent = '⠿'
+
+      dragHandle.addEventListener('mousedown', () => {
+        card.draggable = true
+      })
+      dragHandle.addEventListener('mouseup', () => {
+        card.draggable = false
+      })
+      dragHandle.addEventListener('mouseleave', () => {
+        card.draggable = false
+      })
+
+      const title = document.createElement('span')
+      title.className = 'guided-array-item-title'
+      
+      let summaryText = ''
+      if (item && typeof item === 'object') {
+        const candidate = item.title || item.degree || item.name || item.year || item.role || item.label || item.heading || item.institution || item.id || item.src || ''
+        if (candidate && typeof candidate === 'string') {
+          const clean = candidate.trim()
+          if (clean) {
+            summaryText = clean.length > 32 ? `${clean.slice(0, 32)}…` : clean
+          }
+        }
+      } else if (item !== null && item !== undefined && typeof item !== 'object') {
+        summaryText = String(item)
+      }
+      title.textContent = `Item ${index + 1}`
+      if (summaryText) {
+        const chip = document.createElement('span')
+        chip.className = 'item-summary-chip'
+        chip.textContent = ` · ${summaryText}`
+        title.append(chip)
+      }
       const up = document.createElement('button')
       up.type = 'button'
       up.textContent = 'Up'
@@ -281,12 +444,74 @@ function renderGuidedNode({
         onReplace(nodeValue, { rerender: true })
       })
 
-      controls.append(title, up, down, remove)
+      controls.append(dragHandle, collapseToggle, title, up, down, remove)
       card.append(controls)
 
-      card.append(
+      card.addEventListener('dragstart', (e) => {
+        e.dataTransfer.effectAllowed = 'move'
+        e.dataTransfer.setData(
+          'application/json',
+          JSON.stringify({ path: pathSegments.join('.'), index }),
+        )
+        e.dataTransfer.setData('text/plain', String(index))
+        card.classList.add('is-dragging')
+      })
+
+      card.addEventListener('dragend', () => {
+        card.draggable = false
+        card.classList.remove('is-dragging')
+        wrapper.querySelectorAll('.is-drag-over').forEach((el) => el.classList.remove('is-drag-over'))
+      })
+
+      card.addEventListener('dragover', (e) => {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = 'move'
+        if (!card.classList.contains('is-dragging')) {
+          card.classList.add('is-drag-over')
+        }
+      })
+
+      card.addEventListener('dragleave', (e) => {
+        if (!card.contains(e.relatedTarget)) {
+          card.classList.remove('is-drag-over')
+        }
+      })
+
+      card.addEventListener('drop', (e) => {
+        e.preventDefault()
+        card.classList.remove('is-drag-over')
+
+        let fromIndex = -1
+        try {
+          const raw = e.dataTransfer.getData('application/json')
+          if (raw) {
+            const data = JSON.parse(raw)
+            if (data && data.path === pathSegments.join('.')) {
+              fromIndex = Number(data.index)
+            }
+          }
+        } catch {
+          // fallback
+        }
+
+        if (fromIndex === -1) {
+          const plain = parseInt(e.dataTransfer.getData('text/plain'), 10)
+          if (!Number.isNaN(plain)) fromIndex = plain
+        }
+
+        if (fromIndex >= 0 && fromIndex < nodeValue.length && fromIndex !== index) {
+          const [movedItem] = nodeValue.splice(fromIndex, 1)
+          nodeValue.splice(index, 0, movedItem)
+          onReplace(nodeValue, { rerender: true })
+        }
+      })
+
+      const body = document.createElement('div')
+      body.className = 'guided-array-item-body'
+      body.append(
         renderGuidedNode({
           nodeValue: item,
+          baselineValue,
           keyName: String(index),
           pathSegments: [...pathSegments, String(index)],
           schema,
@@ -299,9 +524,10 @@ function renderGuidedNode({
           onStatus,
           onMarkImageForDeletion,
           uploadImage,
+          fetchImages,
         }),
       )
-
+      card.append(body)
       wrapper.append(card)
     })
 
@@ -363,13 +589,23 @@ function renderGuidedNode({
   const meta = fieldMetaForPath(schema, fieldPath, keyName, nodeValue)
 
   if (meta.control === 'textarea' || meta.control === 'richtext') {
+    const wrap = document.createElement('div')
+    wrap.className = 'guided-textarea-wrap'
+
     const textarea = document.createElement('textarea')
     textarea.className = 'guided-input guided-textarea'
     textarea.value = String(nodeValue ?? '')
     textarea.placeholder = meta.placeholder || ''
     textarea.rows = 5
     textarea.addEventListener('input', () => onReplace(textarea.value, { rerender: false }))
-    return textarea
+
+    const toolbar = createMarkdownToolbar(textarea)
+    const counter = createCharCounter(textarea, {
+      maxChars: meta?.maxChars || meta?.maxLength,
+    })
+
+    wrap.append(toolbar, textarea, counter)
+    return wrap
   }
 
   const input = document.createElement('input')
@@ -386,7 +622,13 @@ function renderGuidedNode({
   })
 
   if (!isLikelyImageField(keyName, input.value)) {
-    return input
+    const wrap = document.createElement('div')
+    wrap.className = 'guided-input-wrap'
+    const counter = createCharCounter(input, {
+      maxChars: meta?.maxChars || meta?.maxLength,
+    })
+    wrap.append(input, counter)
+    return wrap
   }
 
   const imageWrap = document.createElement('div')
@@ -407,6 +649,11 @@ function renderGuidedNode({
   uploadButton.type = 'button'
   uploadButton.textContent = 'Replace image'
 
+  const chooseButton = document.createElement('button')
+  chooseButton.type = 'button'
+  chooseButton.className = 'btn-choose-media'
+  chooseButton.textContent = 'Choose from Library'
+
   const removeButton = document.createElement('button')
   removeButton.type = 'button'
   removeButton.textContent = 'Remove image'
@@ -421,16 +668,22 @@ function renderGuidedNode({
   picker.accept = '.png,.jpg,.jpeg,.jfif,.webp,.svg'
   picker.hidden = true
 
-  uploadButton.addEventListener('click', () => picker.click())
-  picker.addEventListener('change', async () => {
-    const selected = picker.files && picker.files[0]
-    if (!selected) return
+  async function handleImageFile(file) {
+    if (!file) return
+    const validExtensions = ['.png', '.jpg', '.jpeg', '.jfif', '.webp', '.svg']
+    const hasValidExt = validExtensions.some((ext) => file.name?.toLowerCase().endsWith(ext))
+    const isImageMime = file.type?.startsWith('image/')
+    if (!hasValidExt && !isImageMime) {
+      onStatus('Please select or drop a valid image file (.png, .jpg, .webp, .svg).', 'error')
+      return
+    }
 
     uploadButton.disabled = true
+    chooseButton.disabled = true
     onStatus('Uploading image and processing variants. Please wait...', 'saving')
     try {
       const uploadResult = await uploadImage({
-        file: selected,
+        file,
         fieldPath,
         previousImagePath: input.value,
       })
@@ -459,8 +712,33 @@ function renderGuidedNode({
       )
     } finally {
       uploadButton.disabled = false
+      chooseButton.disabled = false
       picker.value = ''
     }
+  }
+
+  uploadButton.addEventListener('click', () => picker.click())
+  picker.addEventListener('change', async () => {
+    const selected = picker.files && picker.files[0]
+    if (selected) {
+      await handleImageFile(selected)
+    }
+  })
+
+  chooseButton.addEventListener('click', () => {
+    openMediaPickerModal({
+      currentPath: input.value,
+      fetchImages,
+      onSelect: (selectedPath) => {
+        if (!selectedPath) return
+        input.value = selectedPath
+        preview.hidden = !isManagedImagePublicPath(selectedPath)
+        if (!preview.hidden) preview.src = selectedPath
+        tempBadge.hidden = !String(selectedPath).includes('-temp')
+        onReplace(selectedPath, { rerender: false })
+        onStatus(`Selected image "${selectedPath}". Save to persist this change.`, 'unsaved')
+      },
+    })
   })
 
   removeButton.addEventListener('click', () => {
@@ -477,7 +755,39 @@ function renderGuidedNode({
     onStatus('Image reference removed. Save to persist this change.', 'unsaved')
   })
 
-  imageControls.append(uploadButton, removeButton, tempBadge, picker)
+  // Drag-and-drop dropzone on image field
+  imageWrap.addEventListener('dragenter', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    imageWrap.classList.add('image-dropzone-active')
+  })
+
+  imageWrap.addEventListener('dragover', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.dataTransfer.dropEffect = 'copy'
+    imageWrap.classList.add('image-dropzone-active')
+  })
+
+  imageWrap.addEventListener('dragleave', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!imageWrap.contains(e.relatedTarget)) {
+      imageWrap.classList.remove('image-dropzone-active')
+    }
+  })
+
+  imageWrap.addEventListener('drop', async (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    imageWrap.classList.remove('image-dropzone-active')
+    const droppedFile = e.dataTransfer?.files?.[0]
+    if (droppedFile) {
+      await handleImageFile(droppedFile)
+    }
+  })
+
+  imageControls.append(uploadButton, chooseButton, removeButton, tempBadge, picker)
   imageWrap.append(imageControls)
   return imageWrap
 }
