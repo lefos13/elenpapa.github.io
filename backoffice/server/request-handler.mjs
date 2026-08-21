@@ -304,6 +304,12 @@ export async function handleRequest(req, res) {
       sendJson(res, 404, { error: 'Not found.' })
       return
     }
+    if (pathname.startsWith('/backoffice/')) {
+      const subpath = pathname.replace(/^\/backoffice/, '') || '/index.html'
+      const servedFromBackoffice = await serveFileFromBaseDir(res, paths.staticDir, subpath)
+      if (servedFromBackoffice) return
+    }
+
 
     if (pathname.startsWith('/images/')) {
       const servedFromPublic = await serveFileFromBaseDir(res, paths.publicDir, pathname)
