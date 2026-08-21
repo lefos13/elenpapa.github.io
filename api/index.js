@@ -818,6 +818,10 @@ async function commitSessionChanges({
     treeSha: `tree-${simulatedCommitSha}`
   };
 }
+function getCompareUrl(branchName, baseBranch = GITHUB_BRANCH || "main") {
+  if (!GITHUB_OWNER || !GITHUB_REPO || !branchName) return "";
+  return `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/compare/${baseBranch}...${encodeURIComponent(branchName)}?expand=1`;
+}
 async function createPullRequestForFinalize({
   branchName,
   baseBranch = GITHUB_BRANCH || "main",
@@ -827,10 +831,12 @@ async function createPullRequestForFinalize({
   owner = GITHUB_OWNER,
   repo = GITHUB_REPO
 }) {
+  const compareUrl = getCompareUrl(branchName, baseBranch);
   if (!isGitHubConfigured()) {
     return {
       created: false,
       skipped: true,
+      compareUrl,
       warning: "PR creation skipped: GITHUB_TOKEN, GITHUB_OWNER, or GITHUB_REPO is not configured."
     };
   }
@@ -857,12 +863,14 @@ async function createPullRequestForFinalize({
     return {
       created: true,
       url: response.data.html_url,
-      number: response.data.number
+      number: response.data.number,
+      compareUrl
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return {
       created: false,
+      compareUrl,
       warning: `Review branch pushed successfully, but Pull Request creation failed: ${message}`
     };
   }
@@ -1886,6 +1894,43 @@ async function handleGitFinalize(req, res) {
   }
 }
 
+// server/handlers/git-create-pr.ts
+async function handleGitCreatePr(req, res) {
+  if (req.method !== "POST") {
+    sendJson(res, 405, { ok: false, error: "Method not allowed" });
+    return;
+  }
+  const user = await requireAuth(req, res);
+  if (!user) return;
+  try {
+    const body = await readJsonBody(req);
+    const branchName = String(body?.branchName ?? "").trim();
+    if (!branchName) {
+      throw new HttpError(400, "branchName is required.");
+    }
+    const prResult = await createPullRequestForFinalize({
+      branchName,
+      baseBranch: GITHUB_BRANCH || "main",
+      commitMessage: body?.commitMessage,
+      title: body?.title,
+      body: body?.body
+    });
+    sendJson(res, 200, {
+      pullRequest: {
+        ...prResult,
+        compareUrl: getCompareUrl(branchName)
+      }
+    });
+  } catch (error) {
+    if (isHttpError(error)) {
+      sendJson(res, error.statusCode, { ok: false, error: error.message });
+      return;
+    }
+    const message = error instanceof Error ? error.message : "PR creation failed.";
+    sendJson(res, 500, { ok: false, error: message });
+  }
+}
+
 // server/handlers/git-preview.ts
 import path6 from "node:path";
 function normalizeSessionPaths(sessionPaths) {
@@ -2505,6 +2550,9 @@ async function handler(req, res) {
   }
   if (pathname === "/api/git/finalize") {
     return handleGitFinalize(req, res);
+  }
+  if (pathname === "/api/git/create-pr") {
+    return handleGitCreatePr(req, res);
   }
   if (pathname === "/api/session/summary") {
     return handleSessionSummary(req, res);

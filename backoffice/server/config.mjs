@@ -32,7 +32,12 @@ export const HOST = process.env.BACKOFFICE_HOST ?? '127.0.0.1'
 export const PORT = Number(process.env.BACKOFFICE_PORT ?? 4310)
 export const BODY_LIMIT_BYTES = 20 * 1024 * 1024
 export const CREATE_PR_ON_FINALIZE =
-  String(process.env.BACKOFFICE_CREATE_PR_ON_FINALIZE ?? 'false').toLowerCase() === 'true'
+  String(
+    process.env.BACKOFFICE_CREATE_PR_ON_FINALIZE ??
+      process.env.CREATE_PR_ON_FINALIZE ??
+      'false',
+  ).toLowerCase() === 'true'
 export const GITHUB_TOKEN = String(process.env.GITHUB_TOKEN ?? '').trim()
 export const GITHUB_OWNER = String(process.env.GITHUB_OWNER ?? '').trim()
 export const GITHUB_REPO = String(process.env.GITHUB_REPO ?? '').trim()
+export const GITHUB_BRANCH = String(process.env.GITHUB_BRANCH ?? 'main').trim()

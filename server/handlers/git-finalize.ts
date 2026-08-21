@@ -42,6 +42,7 @@ export interface FinalizeResultPayload {
     url?: string
     number?: number | null
     warning?: string
+    compareUrl?: string
   }
 }
 

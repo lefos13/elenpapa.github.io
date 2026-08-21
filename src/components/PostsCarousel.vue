@@ -146,7 +146,7 @@ watch(
     id="posts"
     aria-labelledby="posts-title"
     class="posts-section"
-    :class="{ 'diagonal--both-ltr-rtl diagonal-padding--both': hasDiagonal }"
+    :class="{ 'diagonal--both-ltr diagonal-padding--both': hasDiagonal }"
   >
     <div class="container">
       <header class="posts-header" v-reveal>

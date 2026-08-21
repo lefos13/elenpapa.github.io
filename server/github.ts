@@ -757,6 +757,12 @@ export interface CreatePullRequestResult {
   number?: number | null
   warning?: string
   skipped?: boolean
+  compareUrl?: string
+}
+
+export function getCompareUrl(branchName: string, baseBranch = GITHUB_BRANCH || 'main'): string {
+  if (!GITHUB_OWNER || !GITHUB_REPO || !branchName) return ''
+  return `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/compare/${baseBranch}...${encodeURIComponent(branchName)}?expand=1`
 }
 
 /**
@@ -772,10 +778,13 @@ export async function createPullRequestForFinalize({
   owner = GITHUB_OWNER,
   repo = GITHUB_REPO,
 }: CreatePullRequestParams): Promise<CreatePullRequestResult> {
+  const compareUrl = getCompareUrl(branchName, baseBranch)
+
   if (!isGitHubConfigured()) {
     return {
       created: false,
       skipped: true,
+      compareUrl,
       warning: 'PR creation skipped: GITHUB_TOKEN, GITHUB_OWNER, or GITHUB_REPO is not configured.',
     }
   }
@@ -809,11 +818,13 @@ export async function createPullRequestForFinalize({
       created: true,
       url: response.data.html_url,
       number: response.data.number,
+      compareUrl,
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     return {
       created: false,
+      compareUrl,
       warning: `Review branch pushed successfully, but Pull Request creation failed: ${message}`,
     }
   }

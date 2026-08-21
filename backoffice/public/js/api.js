@@ -237,3 +237,15 @@ export async function fetchAuthSession() {
     user: payload?.user || null,
   }
 }
+
+export async function createPullRequest(payload) {
+  return apiRequest('/api/git/create-pr', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function fetchGitHubConfig() {
+  return apiRequest('/api/git/config')
+}

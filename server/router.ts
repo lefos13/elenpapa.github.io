@@ -13,6 +13,7 @@ import handleAuthSession from '../server/handlers/auth-session.js'
 import handleFilesDetail from '../server/handlers/files-detail.js'
 import handleFilesIndex from '../server/handlers/files-index.js'
 import handleGitFinalize from '../server/handlers/git-finalize.js'
+import handleGitCreatePr from '../server/handlers/git-create-pr.js'
 import handleGitPreview from '../server/handlers/git-preview.js'
 import handleGitStatus from '../server/handlers/git-status.js'
 import handleImagesIndex from '../server/handlers/images-index.js'
@@ -114,6 +115,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   // Git finalize
   if (pathname === '/api/git/finalize') {
     return handleGitFinalize(req, res)
+  }
+
+  // Git create PR (on-demand/retry)
+  if (pathname === '/api/git/create-pr') {
+    return handleGitCreatePr(req, res)
   }
 
   // Session summary

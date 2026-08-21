@@ -26,7 +26,11 @@ import {
 import { buildEditorSchema, getSchemaById } from './services/schemas.mjs'
 import { assertBaseRevision, getContentRevision } from './services/revision.mjs'
 import { validateContentPayload } from './services/validation.mjs'
-import { createPullRequestForFinalize } from './services/github.mjs'
+import {
+  createPullRequestForFinalize,
+  getCompareUrl,
+  getGitHubConfig,
+} from './services/github.mjs'
 import { serveFileFromBaseDir } from './services/static-files.mjs'
 import {
   HttpError,
@@ -268,6 +272,29 @@ export async function handleRequest(req, res) {
       return
     }
 
+    if (method === 'GET' && pathname === '/api/git/config') {
+      sendJson(res, 200, { gitHub: getGitHubConfig() })
+      return
+    }
+
+    if (method === 'POST' && pathname === '/api/git/create-pr') {
+      assertJsonRequest(req)
+      const body = await readJsonBody(req, BODY_LIMIT_BYTES)
+      const branchName = String(body?.branchName ?? '').trim()
+      if (!branchName) {
+        throw new HttpError(400, 'branchName is required to create a Pull Request.')
+      }
+      const prResult = await createPullRequestForFinalize({
+        branchName,
+        commitMessage: body?.commitMessage,
+        title: body?.title,
+        body: body?.body,
+        force: true,
+      })
+      sendJson(res, 200, { pullRequest: prResult })
+      return
+    }
+
     if (method === 'POST' && pathname === '/api/git/preview') {
       assertJsonRequest(req)
       const body = await readJsonBody(req, BODY_LIMIT_BYTES)
@@ -287,14 +314,21 @@ export async function handleRequest(req, res) {
           .map((repoPath) => repoPath.replace(/\\/g, '/')),
       ]
       const gitResult = await createReviewBranchAndPush(sessionPaths)
+      const compareUrl = getCompareUrl(gitResult.branchName)
+      const shouldCreatePr = body?.createPr !== false
       const prResult = await createPullRequestForFinalize({
         branchName: gitResult.branchName,
         commitMessage: gitResult.commitMessage,
+        force: shouldCreatePr,
       })
       sendJson(res, 200, {
         result: {
           ...gitResult,
-          pullRequest: prResult,
+          compareUrl,
+          pullRequest: {
+            ...prResult,
+            compareUrl,
+          },
         },
       })
       return

@@ -175,18 +175,3 @@ section {
   padding-top: 150px !important;
   padding-bottom: 150px !important;
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .diagonal,
-  .diagonal--ltr,
-  .diagonal--rtl,
-  .diagonal--top,
-  .diagonal--top-ltr,
-  .diagonal--top-rtl,
-  .diagonal--both-ltr,
-  .diagonal--both-rtl,
-  .diagonal--both-ltr-rtl,
-  .diagonal--both-rtl-ltr {
-    clip-path: none;
-  }
-}

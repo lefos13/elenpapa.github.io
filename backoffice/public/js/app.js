@@ -4,6 +4,7 @@
  * draft recovery, and review workflow in a single orchestration layer.
  */
 import {
+  createPullRequest,
   fetchAuthSession,
   fetchFileContent,
   fetchFiles,
@@ -1067,9 +1068,14 @@ export function createBackofficeApp(elements) {
     }
 
     await runGitTask('finalize', async () => {
-      const result = await finalizeGitReview(
-        buildSessionFinalizePayload(sessionChanges, sessionPaths),
-      )
+      const shouldAutoCreatePr = elements.reviewAutoPrCheckbox
+        ? elements.reviewAutoPrCheckbox.checked
+        : true
+      const payload = {
+        ...buildSessionFinalizePayload(sessionChanges, sessionPaths),
+        createPr: shouldAutoCreatePr,
+      }
+      const result = await finalizeGitReview(payload)
       closeModal(elements.reviewModal)
       reviewCanFinalize = false
 
@@ -1078,17 +1084,72 @@ export function createBackofficeApp(elements) {
       elements.createdPrNote.textContent = ''
       elements.createdPrLink.hidden = true
       elements.createdPrLink.href = '#'
+      if (elements.createdPrCompareLink) {
+        elements.createdPrCompareLink.hidden = true
+        elements.createdPrCompareLink.href = '#'
+      }
+      if (elements.retryCreatePrBtn) {
+        elements.retryCreatePrBtn.hidden = true
+        elements.retryCreatePrBtn.disabled = false
+        elements.retryCreatePrBtn.textContent = 'Retry PR Creation (API)'
+      }
 
       const pullRequest = result.pullRequest || null
+      const compareUrl =
+        pullRequest?.compareUrl ||
+        result.compareUrl ||
+        `https://github.com/elenpapa/elenpapa.github.io/compare/main...${encodeURIComponent(result.branchName)}?expand=1`
+
       if (pullRequest?.created && pullRequest.url) {
         elements.createdPrLink.href = pullRequest.url
+        elements.createdPrLink.textContent = `Open Pull Request #${pullRequest.number || ''} ↗`.trim()
         elements.createdPrLink.hidden = false
         elements.createdPrNote.hidden = false
         elements.createdPrNote.textContent =
-          `Pull Request #${pullRequest.number || ''} was created automatically.`.trim()
-      } else if (pullRequest?.warning) {
-        elements.createdPrNote.hidden = false
-        elements.createdPrNote.textContent = pullRequest.warning
+          `Pull Request #${pullRequest.number || ''} was created automatically on GitHub.`.trim()
+      } else {
+        if (elements.createdPrCompareLink) {
+          elements.createdPrCompareLink.href = compareUrl
+          elements.createdPrCompareLink.hidden = false
+        }
+        if (elements.retryCreatePrBtn) {
+          elements.retryCreatePrBtn.hidden = false
+          elements.retryCreatePrBtn.onclick = async () => {
+            try {
+              elements.retryCreatePrBtn.disabled = true
+              elements.retryCreatePrBtn.textContent = 'Creating PR...'
+              const prRes = await createPullRequest({
+                branchName: result.branchName,
+                commitMessage: result.commitMessage,
+              })
+              const pr = prRes?.pullRequest
+              if (pr?.created && pr?.url) {
+                elements.createdPrLink.href = pr.url
+                elements.createdPrLink.textContent = `Open Pull Request #${pr.number || ''} ↗`.trim()
+                elements.createdPrLink.hidden = false
+                if (elements.createdPrCompareLink) elements.createdPrCompareLink.hidden = true
+                elements.retryCreatePrBtn.hidden = true
+                elements.createdPrNote.hidden = false
+                elements.createdPrNote.textContent = `Pull Request #${pr.number || ''} created successfully.`
+                toasts.show('Pull Request created on GitHub.', { type: 'ok' })
+              } else {
+                throw new Error(pr?.warning || 'PR creation could not be completed via API.')
+              }
+            } catch (err) {
+              const msg = err instanceof Error ? err.message : String(err)
+              elements.createdPrNote.hidden = false
+              elements.createdPrNote.textContent = `API PR notice: ${msg}`
+              toasts.show(`PR creation notice: ${msg}`, { type: 'error' })
+            } finally {
+              elements.retryCreatePrBtn.disabled = false
+              elements.retryCreatePrBtn.textContent = 'Retry PR Creation (API)'
+            }
+          }
+        }
+        if (pullRequest?.warning) {
+          elements.createdPrNote.hidden = false
+          elements.createdPrNote.textContent = pullRequest.warning
+        }
       }
 
       openModal(elements.successModal)

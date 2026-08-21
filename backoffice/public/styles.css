@@ -2848,41 +2848,181 @@ dialog.login-modal[hidden] {
   color: var(--muted);
   max-width: 380px;
 }
+/* Review Modal Options */
+.review-modal-options {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--panel-alt);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.review-pr-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.review-pr-toggle-label input[type='checkbox'] {
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
 .modal-actions {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
-  margin-top: 12px;
+  margin-top: 14px;
+}
+
+/* Success Modal Styles */
+.success-panel {
+  width: min(520px, 94vw);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-lg);
+}
+
+.success-header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.success-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid var(--success);
+  border-radius: 20px;
+  margin-bottom: 8px;
+}
+
+.success-header h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.success-header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.branch-card {
+  background: var(--panel-alt);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+.branch-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 4px;
 }
 
 .branch-name {
   display: block;
-  margin-top: 8px;
-  padding: 8px;
-  border-radius: 8px;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 6px;
   border: 1px solid var(--line);
   background: var(--code-bg);
-  color: var(--text);
+  color: var(--accent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 
+.pr-status-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
 .pr-note {
-  margin: 10px 0 0;
+  margin: 0;
+  padding: 8px 12px;
   font-size: 12px;
+  border-radius: 6px;
+  background: var(--panel-alt);
+  border: 1px solid var(--line);
   color: var(--muted);
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
-.pr-link {
-  display: inline-block;
-  margin-top: 8px;
+.pr-actions-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.btn-pr-link,
+.btn-pr-compare {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
   font-size: 13px;
-  color: var(--accent);
-  text-decoration: underline;
+  font-weight: 600;
+  color: #fff;
+  background: var(--success);
+  border: 1px solid var(--success);
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.pr-link:hover {
-  color: var(--accent-hover);
+.btn-pr-link:hover,
+.btn-pr-compare:hover {
+  background: color-mix(in srgb, var(--success) 85%, black);
+  border-color: color-mix(in srgb, var(--success) 85%, black);
+}
+
+.btn-retry-pr {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--panel-alt);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-retry-pr:hover:enabled {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.success-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .toast-root {

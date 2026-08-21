@@ -178,6 +178,12 @@
         </div>
         <p id="review-error-text" class="modal-error" hidden></p>
         <div id="review-diff-container" class="review-diff-container"></div>
+        <div class="review-modal-options">
+          <label class="review-pr-toggle-label">
+            <input type="checkbox" id="review-auto-pr-checkbox" checked />
+            <span>Automatically create GitHub Pull Request on finalize</span>
+          </label>
+        </div>
         <div class="modal-actions review-modal-actions">
           <button id="cancel-review-flow" type="button">Cancel</button>
           <button id="finalize-review-flow" type="button" class="btn-primary">Finalize & Push</button>
@@ -185,21 +191,36 @@
       </div>
     </div>
 
-    <div id="success-modal" class="modal" hidden>
-      <div class="modal-panel">
-        <h3>Changes Submitted</h3>
-        <p>
-          Branch created and pushed successfully. Copy this branch name and send it to SoftAware
-          studios for review and merge.
-        </p>
-        <code id="created-branch-name" class="branch-name"></code>
-        <p id="created-pr-note" class="pr-note" hidden></p>
-        <a id="created-pr-link" class="pr-link" href="#" target="_blank" rel="noopener" hidden
-          >Open Pull Request</a
-        >
-        <div class="modal-actions">
-          <button id="copy-branch-name" type="button">Copy branch name</button>
-          <button id="close-success-modal" type="button">Close</button>
+    <div id="success-modal" class="modal success-modal" hidden>
+      <div class="modal-panel success-panel">
+        <div class="success-header">
+          <span class="success-badge">✓ Published</span>
+          <h3>Changes Submitted</h3>
+          <p>
+            Branch created and pushed successfully. You can review changes and create or open a Pull Request on GitHub.
+          </p>
+        </div>
+        <div class="branch-card">
+          <span class="branch-label">Review Branch:</span>
+          <code id="created-branch-name" class="branch-name"></code>
+        </div>
+        <div id="created-pr-container" class="pr-status-container">
+          <p id="created-pr-note" class="pr-note" hidden></p>
+          <div class="pr-actions-group">
+            <a id="created-pr-link" class="btn-primary btn-pr-link" href="#" target="_blank" rel="noopener" hidden>
+              Open Pull Request ↗
+            </a>
+            <a id="created-pr-compare-link" class="btn-primary btn-pr-compare" href="#" target="_blank" rel="noopener" hidden>
+              Create Pull Request on GitHub ↗
+            </a>
+            <button id="retry-create-pr-btn" type="button" class="btn-retry-pr" hidden>
+              Retry PR Creation (API)
+            </button>
+          </div>
+        </div>
+        <div class="modal-actions success-actions">
+          <button id="copy-branch-name" type="button">Copy Branch Name</button>
+          <button id="close-success-modal" type="button" class="btn-primary">Done</button>
         </div>
       </div>
     </div>
