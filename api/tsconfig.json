@@ -1,6 +1,6 @@
 {
   "extends": "@tsconfig/node22/tsconfig.json",
-  "include": ["**/*"],
+  "include": ["**/*", "../server/**/*"],
   "compilerOptions": {
     "composite": true,
     "noEmit": true,
