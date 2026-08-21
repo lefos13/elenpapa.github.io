@@ -1,0 +1,9 @@
+<svg width="200" height="300" viewBox="0 0 200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="300" rx="4" fill="#F5F3FA"/>
+  <rect x="20" y="40" width="160" height="8" rx="4" fill="#D8D3E8"/>
+  <rect x="40" y="60" width="120" height="8" rx="4" fill="#D8D3E8"/>
+  <rect x="30" y="80" width="140" height="8" rx="4" fill="#D8D3E8"/>
+  <path d="M75 140L100 165L125 140" stroke="#C4BCDB" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M100 165V120" stroke="#C4BCDB" stroke-width="3" stroke-linecap="round"/>
+  <text x="100" y="210" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#9B8FC4" text-anchor="middle">Σύντομα</text>
+</svg>

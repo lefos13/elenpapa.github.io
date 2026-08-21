@@ -1,0 +1,192 @@
+@import './fonts.css';
+@import './variables.css';
+@import './components/common.css';
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#app {
+  height: 100%;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-serif);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+img {
+  max-width: 100%;
+  display: block;
+  height: auto;
+}
+button {
+  font: inherit;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+section {
+  padding: 64px 0;
+}
+
+.visually-hidden,
+.sr-only {
+  position: absolute !important;
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 0 !important;
+  border: 0 !important;
+  height: 1px !important;
+  width: 1px !important;
+  overflow: hidden;
+}
+
+/* reveal-on-scroll utility */
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
+}
+.reveal.reveal--shown {
+  opacity: 1;
+  transform: none;
+}
+
+/* Skip to content link */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  z-index: 100;
+}
+.skip-link:focus {
+  left: 8px;
+  outline: 2px solid var(--color-primary-600);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.post-content p {
+  text-align: justify;
+}
+
+/* Diagonal section utilities
+   Usage:
+   - `.diagonal` or `.diagonal--ltr` — bottom edge slopes down left → right
+   - `.diagonal--rtl` — bottom edge slopes down right → left
+   - `.diagonal--top` or `.diagonal--top-ltr` — top edge slopes down left → right
+   - `.diagonal--top-rtl` — top edge slopes down right → left
+   - `.diagonal--both-*` variants combine top and bottom edges
+   - Customize height via `--diag-height` (default: clamp(48px, 6vw, 94px))
+*/
+.diagonal,
+.diagonal--ltr,
+.diagonal--rtl,
+.diagonal--top,
+.diagonal--top-ltr,
+.diagonal--top-rtl,
+.diagonal--both-ltr,
+.diagonal--both-rtl,
+.diagonal--both-ltr-rtl,
+.diagonal--both-rtl-ltr {
+  --diag-height: clamp(48px, 6vw, 94px);
+}
+
+/* Bottom Left → Right */
+.diagonal,
+.diagonal--ltr {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--diag-height)), 0 100%);
+}
+
+/* Bottom Right → Left */
+.diagonal--rtl {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 calc(100% - var(--diag-height)));
+}
+
+/* Top Left → Right */
+.diagonal--top,
+.diagonal--top-ltr {
+  clip-path: polygon(0 var(--diag-height), 100% 0, 100% 100%, 0 100%);
+}
+
+/* Top Right → Left */
+.diagonal--top-rtl {
+  clip-path: polygon(0 0, 100% var(--diag-height), 100% 100%, 0 100%);
+}
+
+/* Combined: Top LTR + Bottom LTR */
+.diagonal--both-ltr {
+  clip-path: polygon(0 var(--diag-height), 100% 0, 100% calc(100% - var(--diag-height)), 0 100%);
+}
+
+/* Combined: Top RTL + Bottom RTL */
+.diagonal--both-rtl {
+  clip-path: polygon(0 0, 100% var(--diag-height), 100% 100%, 0 calc(100% - var(--diag-height)));
+}
+
+/* Combined: Top LTR + Bottom RTL */
+.diagonal--both-ltr-rtl {
+  clip-path: polygon(0 var(--diag-height), 100% 0, 100% 100%, 0 calc(100% - var(--diag-height)));
+}
+
+/* Combined: Top RTL + Bottom LTR */
+.diagonal--both-rtl-ltr {
+  clip-path: polygon(0 0, 100% var(--diag-height), 100% calc(100% - var(--diag-height)), 0 100%);
+}
+
+/* Diagonal padding helpers */
+.diagonal-padding--top {
+  padding-top: 150px !important;
+}
+
+.diagonal-padding--bottom {
+  padding-bottom: 150px !important;
+}
+
+.diagonal-padding--both {
+  padding-top: 150px !important;
+  padding-bottom: 150px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diagonal,
+  .diagonal--ltr,
+  .diagonal--rtl,
+  .diagonal--top,
+  .diagonal--top-ltr,
+  .diagonal--top-rtl,
+  .diagonal--both-ltr,
+  .diagonal--both-rtl,
+  .diagonal--both-ltr-rtl,
+  .diagonal--both-rtl-ltr {
+    clip-path: none;
+  }
+}

@@ -1,0 +1,12 @@
+[Desktop Entry]
+# Why this exists:
+# Linux desktop entry for double-click launching without terminal commands.
+Type=Application
+Version=1.0
+Name=Portfolio Backoffice
+Comment=Launch the portfolio content backoffice
+Exec=bash -lc 'cd "$(dirname "%k")" && ./Backoffice.sh'
+Path=.
+Terminal=false
+Icon=utilities-terminal
+Categories=Development;

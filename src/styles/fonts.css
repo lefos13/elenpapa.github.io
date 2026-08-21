@@ -1,0 +1,9 @@
+/* EB Garamond Font Family - Optimized with @fontsource */
+/* Only loading essential weights: 400, 600, 700 */
+/* Using subset imports for better performance */
+@import '@fontsource/eb-garamond/latin-400.css';
+@import '@fontsource/eb-garamond/latin-600.css';
+@import '@fontsource/eb-garamond/latin-700.css';
+@import '@fontsource/eb-garamond/greek-400.css';
+@import '@fontsource/eb-garamond/greek-600.css';
+@import '@fontsource/eb-garamond/greek-700.css';

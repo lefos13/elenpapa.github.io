@@ -1,0 +1,60 @@
+{
+  "heading": "Συνεργασίες με Εκδοτικούς Οίκους",
+  "description": "Επιμέλεια, Μετάφραση, Αξιολόγηση.",
+  "items": [
+    {
+      "name": "Χάρτινη Πόλη",
+      "description": "",
+      "logo": {
+        "src": "/images/publishers/Χάρτινη Πόλη LOGO.svg",
+        "alt": "Εκδόσεις Χάρτινη Πόλη λογότυπο"
+      },
+      "services": ["Επιμέλεια Μετάφρασης", "Μετάφραση ", "Επιμέλεια ", "Διόρθωση"]
+    },
+    {
+      "name": "Anubis",
+      "description": "",
+      "logo": {
+        "src": "/images/publishers/logo.png-1775382727761.webp",
+        "alt": "Εκδόσεις Anubis λογότυπο"
+      },
+      "services": ["Επιμέλεια Μετάφρασης", "Επιμέλεια ", "Διόρθωση"]
+    },
+    {
+      "name": "Moonlight Tales",
+      "description": "",
+      "logo": {
+        "src": "/images/publishers/Moonlight Tales LOGO.png",
+        "alt": "Εκδόσεις Moonlight Tales  λογότυπο"
+      },
+      "services": ["Επιμέλεια", "Διόρθωση"]
+    },
+    {
+      "name": "Bookstagram Editions",
+      "description": "",
+      "logo": {
+        "src": "/images/publishers/Bookstagram editions.png",
+        "alt": "Εκδόσεις Bookstagram editions λογότυπο"
+      },
+      "services": ["Επιμέλεια", "Διόρθωση"]
+    },
+    {
+      "name": "Υδροπλάνο",
+      "description": "",
+      "logo": {
+        "src": "/images/publishers/Υδροπλάνο LOGO.svg",
+        "alt": "Εκδόσεις Υδροπλάνο λογότυπο"
+      },
+      "services": ["Επιμέλεια", "Διόρθωση"]
+    },
+    {
+      "name": "Γραφή",
+      "description": "",
+      "logo": {
+        "src": "/images/publishers/Γραφή LOGO.png",
+        "alt": "Εκδόσεις Γραφή λογότυπο"
+      },
+      "services": ["Αξιολόγηση"]
+    }
+  ]
+}

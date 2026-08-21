@@ -1,0 +1,382 @@
+{
+  "items": [
+    {
+      "year": 2020,
+      "title": "Ματωμένες Πύλες",
+      "cover": "/images/books/bloody-gates.png",
+      "blurb": "Μυθιστόρημα φαντασίας",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2021,
+      "title": "Storm",
+      "cover": "/images/books/Storm.png",
+      "blurb": "Μυθιστόρημα φαντασίας",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2021,
+      "title": "Αύρα",
+      "cover": "/images/books/aura.png",
+      "blurb": "Μυθιστόρημα φαντασίας",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2021,
+      "title": "Εξόριστοι",
+      "cover": "/images/books/eksoristoi.png",
+      "blurb": "Κοινωνικό Μυθιστόρημα",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2021,
+      "title": "Ηλιαχτίδα",
+      "cover": "/images/books/Ηλιαχτίδα.jpg",
+      "blurb": "Αστυνομικό μυθιστόρημα",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2021,
+      "title": "Δείπνο Δολοφόνων",
+      "cover": "/images/books/Δείπνο Δολοφόνων.jpg",
+      "blurb": "Μυθιστόρημα μυστηρίου",
+      "actions": "Beta reading"
+    },
+    {
+      "year": 2021,
+      "title": "Once Upon A Horror Time",
+      "cover": "/images/books/Once Upon A Horror Time.jpg",
+      "blurb": "Συλλογή Διηγημάτων",
+      "actions": "Επιμέλεια"
+    },
+    {
+      "year": 2022,
+      "title": "Ο Οίκος των Δράκων",
+      "cover": "/images/books/houseofdragon.png",
+      "blurb": "Μυθιστόρημα φαντασίας",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2022,
+      "title": "Μια Αιματοβαμμένη Νύχτα στην Τοσκάνη",
+      "cover": "/images/books/Μια Αιματοβαμμένη Νύχτα στην Τοσκάνη.jpg",
+      "blurb": "Μυθιστόρημα τρόμου",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2022,
+      "title": "Η Μαντάμ 2: Σκοτεινές Ψυχές",
+      "cover": "/images/books/Η Μαντάμ 2.jpg",
+      "blurb": "Κοινωνικό μυθιστόρημα",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2022,
+      "title": "Οι Κόρες της Μάγισσας: από τη Ζόρα στη Νιόβη",
+      "cover": "/images/books/Οι Κόρες της Μάγισσας.jpg",
+      "blurb": "Μυθιστόρημα φαντασίας",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2022,
+      "title": "18 Ημέρες Μετά",
+      "cover": "/images/books/18 Μέρες Μετά.jpg",
+      "blurb": "Ρομαντικό μυθιστόρημα",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2022,
+      "title": "Αίμα από Ασήμι",
+      "cover": "/images/books/Αίμα από ασήμι.jpg",
+      "blurb": "Μυθιστόρημα φαντασίας",
+      "actions": "Beta reading"
+    },
+    {
+      "year": 2022,
+      "title": "And they lived happily ever after?",
+      "cover": "/images/books/And they lived happily ever after.jpg",
+      "blurb": "Συλλογή Διηγημάτων",
+      "actions": "Επιμέλεια"
+    },
+    {
+      "year": 2023,
+      "title": "Πεφταστέρι",
+      "cover": "/images/books/Πεφταστέρι.jpg",
+      "blurb": "Νουβέλα μεταφυσικού τρόμου",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2023,
+      "title": "Το Τέκνο της Λύτρωσης",
+      "cover": "/images/books/Το Τέκνο της Λύτρωσης.jpg",
+      "blurb": "Μυθιστόρημα φαντασίας",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2023,
+      "title": "Το Ρόδο της Ερήμου",
+      "cover": "/images/books/9786182250488.jpg",
+      "blurb": "Κοινωνικό μυθιστόρημα",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2023,
+      "title": "Οι Ξεχωριστοί",
+      "cover": "/images/books/Οι Ξεχωριστοί.png",
+      "blurb": "Ερωτικό μυθιστόρημα",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2023,
+      "title": "Μέχρι Τέλους",
+      "cover": "/images/books/Μέχρι Τέλους.jpg",
+      "blurb": "Μυθιστόρημα Μυστηρίου",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2023,
+      "title": "There once was a myth",
+      "cover": "/images/books/There once was a myth.jpg",
+      "blurb": "Συλλογή Διηγημάτων",
+      "actions": "Επιμέλεια"
+    },
+    {
+      "year": 2024,
+      "title": "Το Μυστικό της Κρήνης",
+      "cover": "/images/books/Το Μυστικό της Κρήνης.jpg",
+      "blurb": "Κοινωνικό μυθιστόρημα",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2024,
+      "title": "Αυτόματη Εστίαση",
+      "cover": "/images/books/Αυτόματη Εστιαση.jpg",
+      "blurb": "Θεατρικό έργο",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2024,
+      "title": "Για λίγο σ' αγαπώ",
+      "cover": "/images/books/Για λίγο σ' αγαπώ.png",
+      "blurb": "Ποιητική συλλογή",
+      "actions": "Επιμέλεια-Εικονογράφηση-Διόρθωση"
+    },
+    {
+      "year": 2024,
+      "title": "Echoes of a lost time",
+      "cover": "/images/books/echoes of a lost time.jpg",
+      "blurb": "Συλλογή Διηγημάτων",
+      "actions": "Επιμέλεια"
+    },
+    {
+      "year": 2025,
+      "title": "Η Σιωπή του Πίνακα",
+      "cover": "/images/books/Η Σιωπή του Πίνακα.jpg",
+      "blurb": "Ιστορικό μυθιστόρημα",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2025,
+      "title": "Absent",
+      "cover": "/images/books/Absent.jpg",
+      "blurb": "Θεατρικό έργο",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2025,
+      "title": "52",
+      "cover": "/images/books/52.jpg",
+      "blurb": "Κοινωνικό Μυθιστόρημα",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2025,
+      "title": "Χάλκινο Κλειδί",
+      "cover": "/images/books/Χάλκινο Κλειδί.jpeg",
+      "blurb": "Εφηβικό μυθιστόρημα",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2025,
+      "title": "Απόψε η παρέα μας: Μεσότοπος Λέσβου",
+      "cover": "/images/books/Απόψε η παρέα μας.jpg",
+      "blurb": "Non-fiction",
+      "actions": "Μετάφραση από τα ελληνικά στα αγγλικά"
+    },
+    {
+      "year": 2025,
+      "title": "Τερέζα: Η κραυγή της μάνας",
+      "cover": "/images/books/Η κραυγή της μάνας.jpg",
+      "blurb": "Κοινωνικό μυθιστόρημα",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2025,
+      "title": "Τι κι αν",
+      "cover": "/images/books/Τι κι αν.jpg",
+      "blurb": "Συλλογή Διηγημάτων",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2025,
+      "title": "The path not taken",
+      "cover": "/images/books/The path not taken.jpg",
+      "blurb": "Συλλογή Διηγημάτων",
+      "actions": "Επιμέλεια"
+    },
+    {
+      "year": 2025,
+      "title": "Wednesday",
+      "cover": "/images/books/Wednesday.jpg",
+      "blurb": "Εφηβικό μυθιστόρημα",
+      "actions": "Επιμέλεια μετάφρασης"
+    },
+    {
+      "year": 2025,
+      "title": "Για σένα π' αγαπώ",
+      "cover": "/images/books/Για σένα π' αγαπώ.jpg",
+      "blurb": "Ποιητική συλλογή",
+      "actions": "Επιμέλεια-Εικονογράφηση-Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "50 μυστηριώδη μέρη του κόσμου",
+      "cover": "/images/books/The 50 most mysterious places ever.jpg",
+      "blurb": "Βιβλίο για παιδιά",
+      "actions": "Επιμέλεια μετάφρασης"
+    },
+    {
+      "year": 2026,
+      "title": "Do you know? Jobs and work people do",
+      "cover": "/images/books/jobs-1786971412692.webp",
+      "blurb": "Βιβλίο για παιδιά",
+      "actions": "Μετάφραση"
+    },
+    {
+      "year": 2026,
+      "title": "Το Παρίσι μπορεί να περιμένει",
+      "cover": "/images/books/To-parisi-mporei-na-perimenei-1775383492673.webp",
+      "blurb": "Ρομαντικό μυθιστόρημα",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Φου",
+      "cover": "/images/books/Fou-1775383928668.webp",
+      "blurb": "Βιβλίο για παιδιά",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Παιχνίδια Εξουσίας",
+      "cover": "/images/books/Paixnidia-exousias-1775387197961.webp",
+      "blurb": "Ρομαντικό μυθιστόρημα",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Υπόθεση Πολέτη",
+      "cover": "/images/books/Poletis-1777819789804.webp",
+      "blurb": "Μυθιστόρημα μυστηρίου",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "The Rescue of the Invincibles",
+      "cover": "",
+      "blurb": "Μυθιστόρημα Φαντασίας",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Στην Υπηρεσία του Βασιλιά",
+      "cover": "/images/books/Stin-Ypiresia-tou-Vasilia-1777486480514.webp",
+      "blurb": "Μυθιστόρημα Φαντασίας",
+      "actions": "Διόρθωση Επανέκδοσης"
+    },
+    {
+      "year": 2026,
+      "title": "56 Ημέρες",
+      "cover": "/images/books/56_MERES.jpg-1780595962789.webp",
+      "blurb": "Μυθιστόρημα μυστηρίου-θρίλερ",
+      "actions": "Επιμέλεια Μετάφρασης-Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Αιώνιος Εραστής",
+      "cover": "/images/books/Aiwnios-Erastis-1780595949791.webp",
+      "blurb": "Μυθιστόρημα Φαντασίας",
+      "actions": "Διόρθωση Επανέκδοσης"
+    },
+    {
+      "year": 2026,
+      "title": "Σιδηρά Φρουρά",
+      "cover": "/images/books/SIDIRA-FROURA-1782587424913.webp",
+      "blurb": "Μυθιστόρημα Φαντασίας ",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Μοιραίος Εραστής",
+      "cover": "/images/books/MOIRAIOS-ERASTHS_LOVER-AWAKENED_2026.jpg-1786971358740.webp",
+      "blurb": "Μυθιστόρημα Φαντασίας ",
+      "actions": "Διόρθωση Επανέκδοσης"
+    },
+    {
+      "year": 2026,
+      "title": "Η Έπαυλη",
+      "cover": "/images/books/h-epaulh-draft-2-cover-1777486858075.webp",
+      "blurb": "Νουβέλα Τρόμου",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Μουσείο Κατεστραμμένων Σχέσεων",
+      "cover": "/images/books/Museum-1777486883671.webp",
+      "blurb": "Ανθολογία ",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Η Πύλη της Μέδουσας",
+      "cover": "/images/books/H-PYLH-THS-MEDOUSAS-1782587411545.webp",
+      "blurb": "Μυθιστόρημα Φαντασίας ",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Η Τελευταία Αποστολή Τόμος Α'",
+      "cover": "",
+      "blurb": "Μυθιστόρημα Φαντασίας ",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "What to remember when you are forgetting",
+      "cover": "",
+      "blurb": "Βιβλίο αυτοβοήθειας",
+      "actions": "Επιμέλεια Μετάφρασης-Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Η Τελευταία Αποστολή Τόμος B'",
+      "cover": "",
+      "blurb": "Μυθιστόρημα Φαντασίας ",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Out of Frame",
+      "cover": "",
+      "blurb": "Συλλογή Διηγημάτων",
+      "actions": "Επιμέλεια"
+    },
+    {
+      "year": 2026,
+      "title": "Ίσως τώρα να είναι αλλιώς",
+      "cover": "",
+      "blurb": "Ρομαντικό μυθιστόρημα",
+      "actions": "Διόρθωση"
+    }
+  ]
+}

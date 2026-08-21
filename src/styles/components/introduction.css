@@ -1,0 +1,246 @@
+.intro-section {
+  background: var(--color-bg);
+  padding-bottom: 100px;
+  /* Reserve minimum height to prevent CLS from async content loading */
+  min-height: 1000px;
+}
+
+.intro {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  align-items: center;
+}
+
+.text h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0 0 16px;
+}
+
+.text p {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-2xl);
+  line-height: 1.7;
+  color: var(--color-light-gray);
+  margin: 0 0 24px;
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 12px 24px;
+  background: var(--color-primary-600);
+  color: white;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.cta-button:hover,
+.cta-button:focus-visible {
+  background: var(--color-primary-700);
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: 2px;
+}
+
+.image {
+  position: relative;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 10% 8% 8% 12%;
+  background: rgba(179, 157, 219, 0.2);
+  filter: blur(20px);
+  border-radius: var(--radius-lg);
+}
+
+.image img {
+  position: relative;
+  width: 75%;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 768px) {
+  .image img {
+    width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .intro {
+    grid-template-columns: 1fr;
+  }
+}
+
+.education-milestones {
+  margin-top: 80px;
+  padding-bottom: 40px;
+}
+
+.milestone-grid {
+  --bubble-size: 150px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 32px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  justify-items: center;
+  align-items: start;
+}
+
+.milestone-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  opacity: 1; /* keep visible to allow images to load consistently */
+  width: 100%;
+  max-width: 300px;
+  box-sizing: border-box;
+  padding: 12px 8px;
+  height: 320px;
+}
+
+.bubble {
+  position: relative;
+  width: var(--bubble-size);
+  height: var(--bubble-size);
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+.bubble::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-surface);
+  border-radius: 50%;
+}
+
+.bubble::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-300, #d1c4e9),
+    var(--color-primary-500, #9575cd)
+  );
+  border-radius: 50%;
+  opacity: 0;
+  filter: blur(20px);
+  z-index: -1;
+}
+
+.bubble-icon {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  z-index: 1;
+}
+
+.bubble-svg {
+  width: calc(var(--bubble-size) * 0.65);
+  height: calc(var(--bubble-size) * 0.65);
+  object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(149, 117, 205, 0.18));
+  display: block;
+  image-rendering: -webkit-optimize-contrast;
+  content-visibility: auto;
+}
+
+.bubble-fallback {
+  display: inline-block;
+  font-size: 48px;
+}
+
+.milestone-content {
+}
+
+.milestone-content h3 {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-milestone-heading); /* WCAG AA compliant: 5.1:1 on #e2e2e4 */
+  margin: 0 0 8px;
+  line-height: 1.4;
+}
+
+.milestone-content .institution {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-base);
+  color: var(--color-milestone-institution); /* WCAG AA compliant: 4.63:1 on #e2e2e4 */
+  margin: 0 0 4px;
+  line-height: 1.5;
+}
+
+.milestone-content .year {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-milestone-year); /* WCAG AA compliant: 4.68:1 on #ccccd0 */
+  margin: 0;
+}
+
+@media (max-width: 1024px) {
+  .milestone-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 48px 32px;
+  }
+}
+
+@media (max-width: 640px) {
+  .milestone-grid {
+    grid-template-columns: 1fr;
+    gap: 56px;
+  }
+
+  .bubble {
+    width: 140px;
+    height: 140px;
+  }
+
+  .bubble-icon {
+    font-size: 56px;
+  }
+
+  .education-milestones {
+    margin-top: 60px;
+  }
+}
+
+/* Loading skeleton state for CLS prevention */
+.milestone-card--loading {
+  opacity: 0.4;
+}
+
+.milestone-card--loading .bubble::before {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface) 25%,
+    rgba(179, 157, 219, 0.1) 50%,
+    var(--color-surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

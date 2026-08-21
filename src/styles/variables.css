@@ -1,0 +1,67 @@
+:root {
+  /* Force light theme globally */
+  color-scheme: light;
+  --color-bg: #ccccd0;
+  --color-bg-alt: #f5f5f5;
+  --color-surface: #ffffff;
+  --color-light-gray: #3f3f3f;
+  --color-text: #1f1f29;
+  --color-muted: #5a5a68; /* Darkened from #6b6b7a for better contrast (4.77:1 on white) */
+  --color-primary: #b39ddb; /* lilac */
+  --color-primary-600: #6b4ea8; /* Darkened for WCAG AA contrast (4.62:1 on white) */
+  --color-primary-700: #5c3d99; /* Darker purple for hover states */
+  --color-on-primary: #ffffff;
+
+  /* WCAG AA compliant colors for milestone cards on #e2e2e4 background */
+  --color-milestone-heading: #4a4a52; /* 5.1:1 contrast on #e2e2e4 */
+  --color-milestone-institution: #555555; /* 4.63:1 contrast on #e2e2e4 */
+  --color-milestone-year: #5e35b1; /* 4.68:1 contrast on #ccccd0 */
+
+  --timeline-space: 80px;
+  --timeline-entry-height: 340px;
+  --timeline-cover-width: 200px;
+  --timeline-cover-height: 280px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  --gradient-primary: linear-gradient(
+    135deg,
+    #d4c5f0 0%,
+    #b39ddb 25%,
+    #9575cd 50%,
+    #7e57c2 75%,
+    #6b4ea8 100%
+  );
+
+  --container: 1200px;
+
+  --nice-transition:
+    top 1400ms cubic-bezier(0.34, 1.56, 0.64, 1), left 1400ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    right 1400ms cubic-bezier(0.34, 1.56, 0.64, 1), width 1400ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    height 1400ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    border-radius 1400ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 1350ms ease,
+    border-bottom 1350ms ease;
+  --nice-animation: headerReveal 0.55s ease 0.05s both;
+
+  /* Font stacks */
+  --font-serif: 'EB Garamond', Garamond, Georgia, 'Times New Roman', serif;
+  --font-sans:
+    'EB Garamond', Garamond, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial,
+    'Apple Color Emoji', 'Segoe UI Emoji';
+
+  /* Typography scale */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem; /* 20px */
+  --font-size-2xl: 1.5rem; /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --font-size-4xl: 2.25rem; /* 36px */
+  --font-size-5xl: 3rem; /* 48px */
+  --font-size-6xl: 3.75rem; /* 60px */
+}

@@ -1,0 +1,1155 @@
+/*
+ * Why this exists:
+ * These styles define a clean, content-focused backoffice layout so editing
+ * JSON data is practical for everyday use without touching source files.
+ */
+:root {
+  --bg: #f7f5ef;
+  --panel: #ffffff;
+  --line: #d5d3ca;
+  --text: #2e2b25;
+  --muted: #686257;
+  --accent: #b45f06;
+  --accent-strong: #8f4a05;
+  --danger: #a93226;
+  --danger-bg: #fff1ef;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/*
+ * Why this exists:
+ * Some panels (for example `.images-root`) define their own display mode
+ * in CSS, which can override HTML's default `[hidden]` behavior.
+ * This guard guarantees mode switches fully hide inactive sections.
+ */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text);
+  background: radial-gradient(circle at top right, #f0ead8, var(--bg));
+}
+
+/**
+ * Why this exists:
+ * When a modal is open we lock page scroll so keyboard/mouse focus stays on
+ * the active dialog and users do not accidentally scroll the editor behind it.
+ */
+body.modal-open {
+  overflow: hidden;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  border-right: 1px solid var(--line);
+  background: #fcfbf8;
+  padding: 20px;
+}
+
+.sidebar h1 {
+  margin: 0 0 6px;
+  font-size: 24px;
+}
+
+.sidebar p {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.mode-switch button.is-active {
+  border-color: var(--accent);
+  background: #fff4e7;
+}
+
+.images-tools {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.images-tools label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.images-tools input {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.file-list {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: calc(100vh - 180px);
+  overflow: auto;
+}
+
+.file-list li + li {
+  margin-top: 8px;
+}
+
+.file-list button {
+  width: 100%;
+  text-align: left;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.file-item-title {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.file-item-usage {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.file-list button:hover {
+  border-color: var(--accent);
+}
+
+.file-list button.is-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(180, 95, 6, 0.18);
+}
+
+.workspace {
+  padding: 18px;
+  padding-bottom: 120px;
+}
+
+.toolbar {
+  position: sticky;
+  top: 10px;
+  z-index: 30;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.toolbar-right {
+  display: grid;
+  gap: 10px;
+  min-width: 260px;
+  justify-items: end;
+}
+
+.toolbar-title h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.toolbar-title p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.current-usage {
+  font-size: 12px;
+  color: #5a5448;
+  line-height: 1.4;
+}
+
+.session-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #ddd6c4;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  background: #fdfdfc;
+  color: #50462f;
+}
+
+.session-username {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.logout-button {
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  background: #f5f4ef;
+  border: 1px solid #d5d3ca;
+  border-radius: 999px;
+  cursor: pointer;
+  line-height: 1.3;
+}
+
+.logout-button:hover:enabled {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.status-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #ddd6c4;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  background: #fff9ec;
+  color: #50462f;
+}
+
+.status-icon {
+  font-size: 10px;
+}
+
+.status-strip[data-status='ready'] {
+  background: #f5f4ef;
+}
+
+.status-strip[data-status='unsaved'] {
+  background: #fff2da;
+  border-color: #e3be79;
+}
+
+.status-strip[data-status='saving'] {
+  background: #ecf6ff;
+  border-color: #8db7dd;
+}
+
+.status-strip[data-status='synced'] {
+  background: #eaf7ea;
+  border-color: #9ac89d;
+}
+
+.status-strip[data-status='error'] {
+  background: #fff0ed;
+  border-color: #e0a097;
+}
+
+.editor-mode-switch {
+  display: inline-flex;
+  border: 1px solid #ddd6c4;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.editor-mode-switch button {
+  border: 0;
+  border-right: 1px solid #ddd6c4;
+  border-radius: 0;
+  padding: 7px 11px;
+}
+
+.editor-mode-switch button:last-child {
+  border-right: 0;
+}
+
+.editor-mode-switch button.is-active {
+  background: #f4ecdc;
+  color: #3f3420;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:hover:enabled {
+  border-color: var(--accent);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 65%, #ffffff);
+  outline-offset: 1px;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#save-file {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+#save-file:hover:enabled {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.editor-shell {
+  margin-top: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  min-height: calc(100vh - 140px);
+  padding: 16px;
+}
+
+/*
+ * Why this exists:
+ * The persistent session banner keeps save/reload and git review controls
+ * always visible, which is required for consistent publishing workflows.
+ */
+.session-banner {
+  position: fixed;
+  left: 14px;
+  right: 14px;
+  bottom: 12px;
+  z-index: 50;
+  border: 1px solid #d7cfbb;
+  background: #fffaf0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 24px rgba(63, 44, 18, 0.12);
+}
+
+.session-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.git-status {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+#git-status-text {
+  margin: 0;
+  font-size: 12px;
+  color: #4f493f;
+  line-height: 1.4;
+}
+
+#open-review-flow {
+  background: #205f39;
+  color: #fff;
+  border-color: #205f39;
+}
+
+#open-review-flow:hover:enabled {
+  background: #18492c;
+  border-color: #18492c;
+}
+
+.empty-state {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.empty-state h3 {
+  margin: 0 0 8px;
+  color: #3d382f;
+}
+
+.empty-state p {
+  margin: 0 0 10px;
+}
+
+.empty-state ol {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+}
+
+.editor-root {
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
+}
+
+.images-root {
+  display: grid;
+  gap: 18px;
+}
+
+.image-section h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  text-transform: capitalize;
+}
+
+.image-section-toggle {
+  width: 100%;
+  margin: 0 0 10px;
+  border: 1px solid #ddd6c4;
+  background: #f6f1e2;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-transform: capitalize;
+  font-weight: 600;
+}
+
+.image-section-toggle span:last-child {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: none;
+  font-weight: 400;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.image-card {
+  border: 1px solid #e7e2d2;
+  border-radius: 10px;
+  background: #fcfbf7;
+  overflow: hidden;
+}
+
+.image-preview {
+  width: 100%;
+  height: 160px;
+  object-fit: contain;
+  background: #f3efdf;
+  border-bottom: 1px solid #e2dcc8;
+}
+
+.image-meta {
+  padding: 10px;
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.image-meta strong {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-meta code {
+  background: #efe9d8;
+  border-radius: 4px;
+  padding: 2px 6px;
+  display: inline-block;
+  overflow-wrap: anywhere;
+}
+
+.usage-title {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.usage-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.usage-list li {
+  border: 1px solid #e8e3d3;
+  border-radius: 7px;
+  background: #fff;
+  padding: 6px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.usage-list li span {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+.node {
+  border-left: 2px solid hsl(41 34% calc(80% - (var(--depth, 0) * 3%)));
+  background: hsl(42 40% calc(99% - (var(--depth, 0) * 2%)));
+  border-radius: 8px;
+  margin-left: 8px;
+  padding-left: 10px;
+  padding-bottom: 8px;
+  margin-top: 10px;
+}
+
+.node-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.node-kind {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #efe9d8;
+  color: #5f4d2d;
+}
+
+.entry {
+  background: hsl(43 45% calc(98% - (var(--depth, 0) * 2%)));
+  border: 1px solid #ebe6d8;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+
+.entry-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.entry-head .index {
+  color: var(--muted);
+  font-size: 12px;
+  min-width: 24px;
+}
+
+.key-label {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #d7cfb9;
+  background: #f3eddb;
+  color: #5e4c2f;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+
+.entry-head input,
+.entry-head select,
+.primitive-value,
+.add-controls input,
+.add-controls select {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.entry-head input,
+.primitive-value {
+  flex: 1;
+  min-width: 0;
+}
+
+.entry-head button.delete {
+  border-color: #f2c8c3;
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.entry-head button.delete:hover {
+  border-color: var(--danger);
+}
+
+.add-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/*
+ * Why this exists:
+ * Image uploads run optimizer work on the server, so inline progress feedback
+ * helps editors understand that the action is in progress (not frozen).
+ */
+.upload-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6d5b3e;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f5edda;
+  border: 1px solid #ded1b1;
+}
+
+.upload-spinner {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #ceb98f;
+  border-top-color: #8f6c2d;
+  animation: upload-spin 0.8s linear infinite;
+}
+
+@keyframes upload-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.status-dirty {
+  color: var(--accent);
+}
+
+.status-ready {
+  color: #4e493f;
+}
+
+.status-unsaved {
+  color: #8c5608;
+}
+
+.status-saving {
+  color: #2d638e;
+}
+
+.status-synced {
+  color: #1f6b2f;
+}
+
+.status-error {
+  color: var(--danger);
+}
+
+.status-ok {
+  color: #1f6b2f;
+}
+
+.guided-toc {
+  border: 1px solid #e0d9c8;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fbf8ef;
+  margin-bottom: 12px;
+}
+
+.guided-toc-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #635743;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.guided-toc-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.guided-toc-list button {
+  font-size: 12px;
+  padding: 6px 8px;
+}
+
+.guided-section {
+  border: 1px solid #e2ddcf;
+  border-radius: 10px;
+  background: #fffdf8;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.guided-section-head {
+  border-bottom: 1px solid #eee7d8;
+  padding: 10px 12px;
+  background: #f8f3e6;
+}
+
+.guided-section-head h3 {
+  margin: 0;
+  font-size: 15px;
+  color: #3e372a;
+}
+
+.guided-section-head p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #665d4f;
+}
+
+.guided-section-body {
+  padding: 12px;
+}
+
+.guided-group {
+  display: grid;
+  gap: 10px;
+}
+
+.guided-row {
+  border: 1px solid #eee7d8;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fffeff;
+}
+
+.guided-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3f3728;
+  margin-bottom: 4px;
+}
+
+.guided-helper {
+  margin: 0 0 8px;
+  color: #716657;
+  font-size: 12px;
+}
+
+.guided-input {
+  width: 100%;
+  border: 1px solid #d8d2c2;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.guided-textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.guided-array {
+  display: grid;
+  gap: 10px;
+}
+
+.guided-array-item {
+  border: 1px solid #e8e2d3;
+  border-radius: 8px;
+  background: #fbf9f4;
+  padding: 10px;
+}
+
+.guided-array-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.guided-array-controls span {
+  font-size: 12px;
+  color: #6b6151;
+  margin-right: auto;
+}
+
+.guided-image-field {
+  display: grid;
+  gap: 8px;
+}
+
+.guided-image-preview {
+  width: min(280px, 100%);
+  border-radius: 8px;
+  border: 1px solid #ddd6c4;
+  background: #f3efdf;
+}
+
+.guided-image-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.guided-temp-badge {
+  font-size: 11px;
+  color: #8a5e1b;
+  border: 1px solid #ddb66f;
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: #fff1d7;
+}
+
+.guided-field-errors {
+  margin-top: 8px;
+  border: 1px solid #efb4ad;
+  border-radius: 8px;
+  background: #fff2f0;
+  padding: 6px 8px;
+}
+
+.guided-field-error {
+  margin: 0;
+  color: #8a2a21;
+  font-size: 12px;
+}
+
+/*
+ * Why this exists:
+ * The review and success modals enforce a two-step git publish flow:
+ * preview first, then explicit finalize.
+ */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(20, 15, 7, 0.48);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.modal-panel {
+  width: min(860px, 100%);
+  max-height: 82vh;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #ded7c6;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/*
+ * Why this exists:
+ * The login modal isolates the authentication flow so unauthorized users
+ * or expired sessions are intercepted before modifying content.
+ */
+dialog.login-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  margin: 0;
+  border: none;
+  padding: 16px;
+  background: rgba(20, 15, 7, 0.55);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+}
+
+dialog.login-modal[hidden] {
+  display: none !important;
+}
+
+.login-panel {
+  width: min(420px, 100%);
+  background: #ffffff;
+  border: 1px solid #ded7c6;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.login-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #fbf3ea;
+  color: var(--accent);
+  border: 1px solid #eedec9;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.login-header h3 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  color: var(--text);
+}
+
+.login-header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-form .form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4e493f;
+}
+
+.login-form .form-group input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fdfdfc;
+  color: var(--text);
+  box-sizing: border-box;
+}
+
+.login-form .form-group input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(180, 95, 6, 0.15);
+}
+
+.login-actions {
+  margin-top: 6px;
+}
+
+.login-actions button {
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--accent);
+  color: #ffffff;
+  border: 1px solid var(--accent-strong);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.login-actions button:hover:enabled {
+  background: var(--accent-strong);
+}
+
+.login-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.modal-panel h3 {
+  margin: 0 0 8px;
+}
+
+.modal-panel h4 {
+  margin: 12px 0 8px;
+  font-size: 13px;
+  color: #4c4336;
+}
+
+.modal-summary {
+  margin: 0;
+  padding: 8px;
+  border: 1px solid #e7e0cf;
+  border-radius: 8px;
+  background: #faf6eb;
+  white-space: pre-wrap;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.modal-error {
+  margin: 0 0 8px;
+  padding: 8px;
+  border: 1px solid #f0b7af;
+  border-radius: 8px;
+  background: #fff2f0;
+  color: #8f2c22;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.review-list {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.review-list li {
+  border: 1px solid #e9e2d3;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 12px;
+  background: #fcfaf3;
+  overflow-wrap: anywhere;
+}
+
+.review-semantic-list li {
+  background: #f8f5eb;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.branch-name {
+  display: block;
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #d5ceb8;
+  background: #f8f3e7;
+  overflow-wrap: anywhere;
+}
+
+.pr-note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #5e5547;
+  line-height: 1.35;
+}
+
+.pr-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #1b5c3d;
+  text-decoration: underline;
+}
+
+.pr-link:hover {
+  color: #123f2a;
+}
+
+.toast-root {
+  position: fixed;
+  right: 14px;
+  bottom: 90px;
+  z-index: 90;
+  display: grid;
+  gap: 8px;
+  width: min(360px, calc(100vw - 28px));
+}
+
+.toast {
+  border: 1px solid #ddd6c4;
+  background: #fffdf8;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #3f372b;
+  box-shadow: 0 8px 24px rgba(31, 22, 11, 0.1);
+}
+
+.toast-ok {
+  border-color: #9ccba0;
+  background: #eff9ef;
+}
+
+.toast-error {
+  border-color: #e6a39a;
+  background: #fff2f0;
+}
+
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .file-list {
+    max-height: 220px;
+  }
+
+  .editor-shell {
+    min-height: 420px;
+  }
+
+  .session-banner {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .git-status {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    flex-direction: column;
+  }
+
+  .toolbar-right {
+    justify-items: start;
+    width: 100%;
+  }
+
+  .editor-mode-switch {
+    width: 100%;
+  }
+
+  .editor-mode-switch button {
+    flex: 1;
+  }
+}

@@ -1,0 +1,160 @@
+<!--
+  Why this exists:
+  This file provides the backoffice shell UI used to manage JSON website content.
+  It keeps editing focused, approachable, and isolated from the public website.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio Backoffice</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <h1>Backoffice</h1>
+        <p>Edit JSON content files used by the portfolio website.</p>
+        <div class="mode-switch">
+          <button id="mode-content" class="is-active" type="button">Content</button>
+          <button id="mode-images" type="button">Images</button>
+        </div>
+        <button id="refresh-files" type="button">Refresh files</button>
+        <ul id="file-list" class="file-list"></ul>
+      </aside>
+
+      <main class="workspace">
+        <header class="toolbar">
+          <div class="toolbar-title">
+            <h2 id="current-file">Choose a file</h2>
+            <p id="current-usage" class="current-usage">Usage details will appear here.</p>
+            <p id="status-text">Load a JSON file from the left panel.</p>
+          </div>
+          <div class="toolbar-right">
+            <div id="session-user" class="session-user" hidden>
+              <span id="session-username" class="session-username">Admin</span>
+              <button id="logout-button" class="logout-button" type="button">Logout</button>
+            </div>
+            <div id="status-strip" class="status-strip" data-status="ready" aria-live="polite">
+              <span id="status-icon" class="status-icon" aria-hidden="true">●</span>
+              <span id="status-label">Ready</span>
+            </div>
+            <div id="editor-mode-switch" class="editor-mode-switch" hidden>
+              <button id="editor-mode-guided" class="is-active" type="button">Guided</button>
+              <button id="editor-mode-json" type="button">Advanced</button>
+            </div>
+          </div>
+        </header>
+
+        <section class="editor-shell">
+          <div id="empty-state" class="empty-state">
+            <h3>Start editing content</h3>
+            <p>Choose a file from the left panel, update values, then click Save.</p>
+            <ol>
+              <li>Use Guided mode for simple form-like editing.</li>
+              <li>Use Advanced mode only for edge cases.</li>
+              <li>Upload images directly from image fields and save to finalize them.</li>
+            </ol>
+          </div>
+          <div id="editor-root" class="editor-root" hidden></div>
+          <div id="images-tools" class="images-tools" hidden>
+            <label for="image-search">Search images</label>
+            <input id="image-search" type="search" placeholder="Name, path, section, usage..." />
+            <button id="clear-image-search" type="button">Clear search</button>
+          </div>
+          <div id="images-root" class="images-root" hidden></div>
+        </section>
+      </main>
+    </div>
+    <aside id="session-banner" class="session-banner">
+      <div class="session-actions">
+        <button id="reload-file" type="button" disabled>Reload</button>
+        <button id="save-file" type="button" disabled>Save</button>
+      </div>
+      <div class="git-status">
+        <p id="git-status-text">Git status: loading...</p>
+        <button id="refresh-git-status" type="button">Refresh git</button>
+      </div>
+      <div class="review-actions">
+        <button id="open-review-flow" type="button" disabled>Create Review Branch</button>
+      </div>
+    </aside>
+
+    <dialog id="login-modal" class="modal login-modal" aria-labelledby="login-modal-title" hidden>
+      <div class="modal-panel login-panel">
+        <div class="login-header">
+          <div class="login-badge">Protected Area</div>
+          <h3 id="login-modal-title">Admin Authentication</h3>
+          <p>Please enter your administrator credentials to manage content.</p>
+        </div>
+        <form id="login-form" class="login-form">
+          <div id="login-error" class="modal-error login-error" role="alert" hidden></div>
+          <div class="form-group">
+            <label for="login-username">Username</label>
+            <input
+              id="login-username"
+              name="username"
+              type="text"
+              autocomplete="username"
+              value="admin"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input
+              id="login-password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              placeholder="Enter admin password..."
+              required
+            />
+          </div>
+          <div class="modal-actions login-actions">
+            <button id="login-submit" type="submit" class="btn-primary">Sign In</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <div id="review-modal" class="modal" hidden>
+      <div class="modal-panel">
+        <h3>Review Changes</h3>
+        <p>Preview of changes from this backoffice session.</p>
+        <p id="review-error-text" class="modal-error" hidden></p>
+        <h4>Content change summary</h4>
+        <ul id="review-semantic-list" class="review-list review-semantic-list"></ul>
+        <h4>Raw git summary</h4>
+        <pre id="review-summary" class="modal-summary"></pre>
+        <ul id="review-changes-list" class="review-list"></ul>
+        <div class="modal-actions">
+          <button id="cancel-review-flow" type="button">Cancel</button>
+          <button id="finalize-review-flow" type="button">Finalize & Push</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="success-modal" class="modal" hidden>
+      <div class="modal-panel">
+        <h3>Changes Submitted</h3>
+        <p>
+          Branch created and pushed successfully. Copy this branch name and send it to SoftAware
+          studios for review and merge.
+        </p>
+        <code id="created-branch-name" class="branch-name"></code>
+        <p id="created-pr-note" class="pr-note" hidden></p>
+        <a id="created-pr-link" class="pr-link" href="#" target="_blank" rel="noopener" hidden
+          >Open Pull Request</a
+        >
+        <div class="modal-actions">
+          <button id="copy-branch-name" type="button">Copy branch name</button>
+          <button id="close-success-modal" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+    <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+    <script src="./js/main.js" type="module"></script>
+  </body>
+</html>

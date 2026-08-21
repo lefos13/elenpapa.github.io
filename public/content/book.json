@@ -1,0 +1,80 @@
+{
+  "hero": {
+    "title": "Ένα Μόνο Γράμμα",
+    "subtitle": "Βασισμένο σε αληθινή ιστορία",
+    "tagline": "Ένα μόνο γράμμα ήταν αρκετό για να φέρει τα πάνω κάτω στη ζωή της Κατερίνας. Ένα κομμάτι χαρτί, γραμμένο με προσμονή από τον εφτάχρονο γιο της. Λέξεις από μελάνι που άνοιξαν τις ρωγμές και άφησαν το παρελθόν να ξεχυθεί και να την κατασπαράξει. Πρόσωπα που πέρασαν αλλά δεν λησμονήθηκαν ποτέ αρχίζουν να έρχονται στο προσκήνιο. Από τη μία ο Νίκος, το στήριγμά της σε μία από τις πιο δύσκολες περιόδους της ζωής της, και από την άλλη ο Γρηγόρης, η προσωποποίηση του εφιάλτη της, ο άνδρας που στοίχειωσε μέχρι και το τελευταίο κύτταρό της. Ένα άγγιγμα αγάπης και ένα άλλο γεμάτο πόνο και μίσος… Αυτήν τη φορά, όμως, πρέπει να παλέψει. Για τον Άγγελο, που ρωτά αν ο πατέρας του γνωρίζει για εκείνον. Για τον εαυτό της, που αγωνίζεται να πάρει μια ανάσα μέσα από τη σκοτεινή θάλασσα των αναμνήσεων. Και για έναν νέο έρωτα που γεννιέται και πρέπει να πατήσει σε πιο σταθερές βάσεις.",
+    "cover": "/images/books/Ένα μόνο γράμμα.jpg",
+    "coverAlt": "Εξώφυλλο βιβλίου",
+    "goodreadsUrl": "https://www.goodreads.com/book/show/60709229",
+    "goodreadsLabel": "Δείτε το στο Goodreads",
+    "moonlighttalesUrl": "https://www.moonlightales.com/2022/05/blog-post.html",
+    "moonlighttalesLabel": "Διαβάστε τη συνέντευξη"
+  },
+  "about": {
+    "heading": "Λίγα λόγια για το βιβλίο",
+    "body": "",
+    "pullQuote": "\"Ένα δυνατό κοινωνικό μυθιστόρημα, μια αληθινή ιστορία που ανατριχιάζει και συγκινεί. Αν και δεν διαβάζω συχνά το είδος, αυτό το βιβλίο με άγγιξε.\"",
+    "pullQuoteAriaLabel": "Book highlight quote"
+  },
+  "eventsSection": {
+    "heading": "Είπαν για το βιβλίο",
+    "subtitle": "Μερικές ενδεικτικές στιγμές που θα αποτυπωθούν με πραγματικές φωτογραφίες από παρουσιάσεις, εργαστήρια και συναντήσεις."
+  },
+  "events": [
+    {
+      "id": "1",
+      "instagramEmbedHtml": "<blockquote class=\"instagram-media\" data-instgrm-permalink=\"https://www.instagram.com/reel/Ck-lz61IQ9_/?utm_source=ig_embed&amp;utm_campaign=loading\" data-instgrm-version=\"14\"><a href=\"https://www.instagram.com/reel/Ck-lz61IQ9_/?utm_source=ig_embed&amp;utm_campaign=loading\" target=\"_blank\" rel=\"noreferrer noopener\">Δείτε αυτή τη δημοσίευση στο Instagram</a></blockquote>",
+      "image": {
+        "src": "/images/books/mock-event-1.png",
+        "alt": "Mock φωτογραφία από παρουσίαση βιβλίου"
+      }
+    },
+    {
+      "id": "2",
+      "instagramEmbedHtml": "<blockquote class=\"instagram-media\" data-instgrm-permalink=\"https://www.instagram.com/p/CcNcUYuslQU/?utm_source=ig_embed&amp;utm_campaign=loading\" data-instgrm-version=\"14\"><a href=\"https://www.instagram.com/p/CcNcUYuslQU/?utm_source=ig_embed&amp;utm_campaign=loading\" target=\"_blank\"><a href=\"https://www.instagram.com/p/CcNcUYuslQU/?utm_source=ig_embed&amp;utm_campaign=loading\" target=\"_blank\">Η δημοσίευση κοινοποιήθηκε από το χρήστη Hartini Poli / Χάρτινη Πόλη(@hartinipolibooks)</a></blockquote>",
+      "image": {
+        "src": "/images/books/mock-event-2.png",
+        "alt": "Mock φωτογραφία από online εργαστήριο"
+      }
+    },
+    {
+      "id": "3",
+      "instagramEmbedHtml": "<blockquote class=\"instagram-media\" data-instgrm-permalink=\"https://www.instagram.com/p/Ccao_WdMvXl/?utm_source=ig_embed&amp;utm_campaign=loading\" data-instgrm-version=\"14\"><a href=\"https://www.instagram.com/p/Ccao_WdMvXl/?utm_source=ig_embed&amp;utm_campaign=loading\" target=\"_blank\" rel=\"noreferrer noopener\">Δείτε αυτή τη δημοσίευση στο Instagram</a></blockquote>",
+      "image": {
+        "src": "/images/books/mock-event-3.png",
+        "alt": "Mock φωτογραφία από υπογραφή βιβλίων"
+      }
+    },
+    {
+      "id": "4",
+      "instagramEmbedHtml": "<blockquote class=\"instagram-media\" data-instgrm-permalink=\"https://www.instagram.com/p/Ccao_WdMvXl/?utm_source=ig_embed&amp;utm_campaign=loading\" data-instgrm-version=\"14\"><a href=\"https://www.instagram.com/p/Ccao_WdMvXl/?utm_source=ig_embed&amp;utm_campaign=loading\" target=\"_blank\" rel=\"noreferrer noopener\">Δείτε αυτή τη δημοσίευση στο Instagram</a></blockquote>",
+      "image": {
+        "src": "/images/books/mock-event-3.png",
+        "alt": "Mock φωτογραφία από υπογραφή βιβλίων"
+      }
+    },
+    {
+      "id": "5",
+      "instagramEmbedHtml": "<blockquote class=\"instagram-media\" data-instgrm-permalink=\"https://www.instagram.com/p/Cj0Gg2cozgt/?utm_source=ig_embed&amp;utm_campaign=loading\" data-instgrm-version=\"14\"><a href=\"https://www.instagram.com/p/Cj0Gg2cozgt/?utm_source=ig_embed&amp;utm_campaign=loading\" target=\"_blank\" rel=\"noreferrer noopener\">Δείτε αυτή τη δημοσίευση στο Instagram</a></blockquote>",
+      "image": {
+        "src": "/images/books/mock-event-3.png",
+        "alt": "Mock φωτογραφία από παρουσίαση/υπογραφή βιβλίου"
+      }
+    },
+    {
+      "id": "6",
+      "instagramEmbedHtml": "<blockquote class=\"instagram-media\" data-instgrm-permalink=\"https://www.instagram.com/p/DAg9qz9u2p8/?utm_source=ig_embed&amp;utm_campaign=loading\" data-instgrm-version=\"14\"><a href=\"https://www.instagram.com/p/DAg9qz9u2p8/?utm_source=ig_embed&amp;utm_campaign=loading\" target=\"_blank\" rel=\"noreferrer noopener\">Δείτε αυτή τη δημοσίευση στο Instagram</a></blockquote>",
+      "image": {
+        "src": "/images/books/mock-event-3.png",
+        "alt": "Mock φωτογραφία από παρουσίαση/υπογραφή βιβλίου"
+      }
+    }
+  ],
+  "preview": {
+    "heading": "Μικρό απόσπασμα",
+    "lede": "Πρόλογος",
+    "excerpt": "Μουδιασμένη… Ναι, αυτή ήταν η σωστή λέξη, εκείνη που έψαχνε το μυαλό μου για ώρες. Το κορμί μου ήταν αδύναμο και κουρασμένο. Ένιωθα ένα περίεργο κενό. Δεν πονούσα, όχι. Πώς αισθάνεται πόνο ένα παραλυμένο σώμα; Γύρισα από την άλλη πλευρά, δεν ήθελα να βλέπω την τζαμαρία. Τα φώτα με ζάλιζαν, οι άνθρωποι που περπατούσαν συνεχώς με αποσυντόνιζαν. Τι έκαναν με τις ζωές τους; Άραγε γιατί έρχονταν στο νοσοκομείο; Γιατί έφευγαν; Άλλοι το προσπερνούσαν εντελώς˙ εκείνους τους ζήλευα. Περπατούσαν από μπροστά, χωρίς να του ρίξουν μια ματιά, χωρίς να το σκεφτούν. Μιλούσαν στο τηλέφωνο ή σε κάποιον δίπλα τους και γελούσαν. Πώς μπορούν να γελούν έξω από ένα κτίριο γεμάτο ανθρώπους που παλεύουν; Ή που πεθαίνουν… ",
+    "note": "Διαβάστε τη συνέχεια.",
+    "previewUrl": "https://www.moonlightales.com/2021/06/blog-post_29.html"
+  }
+}

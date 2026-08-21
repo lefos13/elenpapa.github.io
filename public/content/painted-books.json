@@ -1,0 +1,235 @@
+{
+  "hero": {
+    "title": "Χρωματιστές άκρες (Σόκορα) βιβλίων",
+    "subtitle": "Θυμάστε που σας έλεγα ότι ενίοτε ζωγραφίζω πάνω ή μέσα σε βιβλία;",
+    "description": "Όλο και πιο συχνά, οι εκδοτικοί στην Ελλάδα επιλέγουν να κυκλοφορήσουν συλλεκτικές εκδόσεις βιβλίων με ζωγραφισμένες σελίδες. Επειδή, όμως, δεν βγαίνουν έτσι όλα τα βιβλία, πήρα την κατάσταση στα χέρια μου. Παρακάτω θα βρείτε μερικά από τα βιβλία που έχω ζωγραφίσει μέχρι σήμερα.",
+    "media": {
+      "src": "/images/painted-books/book-8.webp",
+      "alt": "Ζωγραφισμένες άκρες βιβλίου με λεπτομέρεια"
+    }
+  },
+  "gallery": {
+    "heading": "Βιβλία με χρωματιστές άκρες - sprayed edges",
+    "itemsPerPage": 3,
+    "items": [
+      {
+        "id": "1",
+        "title": "The Love Hypothesis",
+        "author": "Ali Hazelwood",
+        "media": {
+          "src": "/images/painted-books/book-7.webp",
+          "alt": "Ζωγραφισμένες άκρες The Love Hypothesis"
+        }
+      },
+      {
+        "id": "2",
+        "title": "Αντίπαλο Δέος",
+        "author": "Rebecca Ross",
+        "media": {
+          "src": "/images/painted-books/book-11.webp",
+          "alt": "Ζωγραφισμένες άκρες Αντίπαλο Δέος"
+        }
+      },
+      {
+        "id": "3",
+        "title": "Η Φίνλεϊ Ντόνοβαν τζογάρει",
+        "author": "Elle Cosimano",
+        "media": {
+          "src": "/images/painted-books/book-12.webp",
+          "alt": "Ζωγραφισμένες άκρες Η Φίνλεϊ Ντόνοβαν τζογάρει"
+        }
+      },
+      {
+        "id": "4",
+        "title": "Όπου κι αν είσαι",
+        "author": "Ιωάννα Γκανέτσα",
+        "media": {
+          "src": "/images/painted-books/book-18.webp",
+          "alt": "Ζωγραφισμένες άκρες Όπου κι αν είσαι"
+        }
+      },
+      {
+        "id": "5",
+        "title": "Έρωτας με την τρίτη ματιά",
+        "author": "Γιώργος Αγγελίδης",
+        "media": {
+          "src": "/images/painted-books/book-2.webp",
+          "alt": "Ζωγραφισμένες άκρες Έρωτας με την τρίτη ματιά"
+        }
+      },
+      {
+        "id": "6",
+        "title": "Και εγένετο φως",
+        "author": "Στέφανος Αλεξιάδης",
+        "media": {
+          "src": "/images/painted-books/book-9.webp",
+          "alt": "Ζωγραφισμένες άκρες Και εγένετο φως"
+        }
+      },
+      {
+        "id": "7",
+        "title": "Solitaire",
+        "author": "Alice Oseman",
+        "media": {
+          "src": "/images/painted-books/book-5.webp",
+          "alt": "Ζωγραφισμένες άκρες Solitaire"
+        }
+      },
+      {
+        "id": "8",
+        "title": "Loveless",
+        "author": "Alice Oseman",
+        "media": {
+          "src": "/images/painted-books/book-16.webp",
+          "alt": "Ζωγραφισμένες άκρες Loveless"
+        }
+      },
+      {
+        "id": "9",
+        "title": "Nick and Charlie",
+        "author": "Alice Oseman",
+        "media": {
+          "src": "/images/painted-books/book-10.webp",
+          "alt": "Ζωγραφισμένες άκρες Nick and Charlie"
+        }
+      },
+      {
+        "id": "10",
+        "title": "Γιορτινά Φονικά Αινίγματα",
+        "author": "G. T. Karber",
+        "media": {
+          "src": "/images/painted-books/book-19.webp",
+          "alt": "Ζωγραφισμένες άκρες Γιορτινά Φονικά Αινίγματα"
+        }
+      },
+      {
+        "id": "11",
+        "title": "Φονικά Αινίγματα Τόμοι 2,3",
+        "author": "G. T. Karber",
+        "media": {
+          "src": "/images/painted-books/book-4.webp",
+          "alt": "Ζωγραφισμένες άκρες Φονικά Αινίγματα Τόμοι 2,3"
+        }
+      },
+      {
+        "id": "12",
+        "title": "Wonder",
+        "author": "R. J. Palacio",
+        "media": {
+          "src": "/images/painted-books/book-15.webp",
+          "alt": "Ζωγραφισμένες άκρες Wonder"
+        }
+      },
+      {
+        "id": "13",
+        "title": "Όσα αφήσαμε πίσω μας",
+        "author": "Lucy Score",
+        "media": {
+          "src": "/images/painted-books/book-14.webp",
+          "alt": "Ζωγραφισμένες άκρες Όσα αφήσαμε πίσω μας"
+        }
+      },
+      {
+        "id": "14",
+        "title": "Dreamland Billionaires 1,2,3",
+        "author": "Lauren Asher",
+        "media": {
+          "src": "/images/painted-books/book-17.webp",
+          "alt": "Ζωγραφισμένες άκρες Dreamland Billionaires 1,2,3"
+        }
+      },
+      {
+        "id": "15",
+        "title": "Όσα ποτέ δεν ξεπεράσαμε",
+        "author": "Lucy Score",
+        "media": {
+          "src": "/images/painted-books/book-13.webp",
+          "alt": "Ζωγραφισμένες άκρες Όσα ποτέ δεν ξεπεράσαμε"
+        }
+      },
+      {
+        "id": "16",
+        "title": "There once was a myth",
+        "author": "Συλλογή Διηγημάτων - Moonlight Tales",
+        "media": {
+          "src": "/images/painted-books/book-1.webp",
+          "alt": "Ζωγραφισμένες άκρες There once was a myth"
+        }
+      },
+      {
+        "id": "17",
+        "title": "And they lived happily ever after?",
+        "author": "Συλλογή Διηγημάτων - Moonlight Tales",
+        "media": {
+          "src": "/images/painted-books/book-3.webp",
+          "alt": "Ζωγραφισμένες άκρες And they lived happily ever after?"
+        }
+      },
+      {
+        "id": "18",
+        "title": "The path not taken",
+        "author": "Συλλογή Διηγημάτων - Moonlight Tales",
+        "media": {
+          "src": "/images/painted-books/book-6.webp",
+          "alt": "Ζωγραφισμένες άκρες The path not taken"
+        }
+      },
+      {
+        "id": "19",
+        "title": "Πριν λυθούν τα μάγια",
+        "author": "Liz Braswell",
+        "media": {
+          "src": "/images/painted-books/book-20.webp",
+          "alt": "Ζωγραφισμένες άκρες Πριν λυθούν τα μάγια"
+        }
+      },
+      {
+        "id": "20",
+        "title": "Επτά χρόνια μακριά",
+        "author": "Ashley Poston",
+        "media": {
+          "src": "/images/painted-books/book-21.webp",
+          "alt": "Ζωγραφισμένες άκρες Επτά χρόνια μακριά"
+        }
+      },
+      {
+        "id": "21",
+        "title": "Οι νεκροί ρομαντικοί",
+        "author": "Ashley Poston",
+        "media": {
+          "src": "/images/painted-books/book-22.webp",
+          "alt": "Ζωγραφισμένες άκρες Οι νεκροί ρομαντικοί"
+        }
+      },
+      {
+        "id": "22",
+        "title": "Ο Μπλε Κλήρος",
+        "author": "Sophie Mackintosh",
+        "media": {
+          "src": "/images/painted-books/book-23.webp",
+          "alt": "Ζωγραφισμένες άκρες Ο Μπλε Κλήρος"
+        }
+      },
+      {
+        "id": "23",
+        "title": "The Kiss Curse",
+        "author": "Erin Sterling",
+        "media": {
+          "src": "/images/painted-books/kisscurse-1771685943821.webp",
+          "alt": "Ζωγραφισμένες άκρες The Kiss Curse"
+        }
+      }
+    ]
+  },
+  "cta": {
+    "heading": "Ενδιαφέρεσαι για ένα custom βιβλίο;",
+    "body": "Επικοινώνησε μαζί μου.",
+    "buttons": [
+      {
+        "label": "Στείλε μου μήνυμα",
+        "href": "/#contact",
+        "variant": "primary"
+      }
+    ]
+  }
+}

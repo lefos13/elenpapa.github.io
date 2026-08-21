@@ -1,0 +1,106 @@
+{
+  "seo": {
+    "siteUrl": "https://editopia.gr",
+    "defaultImage": "/images/intro.png",
+    "siteName": "Έλενα Παπαδοπούλου",
+    "locale": "el_GR",
+    "author": "Έλενα Παπαδοπούλου",
+    "pages": {
+      "home": {
+        "title": "Έλενα Παπαδοπούλου | Επιμέλεια, Διόρθωση, Μετάφραση",
+        "description": "Επιμέλεια & διόρθωση κειμένων, μετάφραση βιβλίων και αξιολόγηση χειρογράφων προς έκδοση. Εξειδίκευση στα λογοτεχνικά βιβλία.",
+        "image": "/images/og/home.png",
+        "path": "/"
+      },
+      "timeline": {
+        "title": "Εργογραφία | Βιβλία, Επιμέλεια, Διόρθωση, Μετάφραση",
+        "description": "Βιβλία συγγραφέων που έχω επιμεληθεί, διορθώσει ή μεταφράσει και έχουν φτάσει στην έκδοση.",
+        "image": "/images/og/timeline.png",
+        "path": "/timeline"
+      },
+      "book": {
+        "title": "Ένα μόνο γράμμα | Βιβλίο της Έλενας Παπαδοπούλου",
+        "description": "Ανακαλύψτε το βιβλίο μου «Ένα μόνο γράμμα». Διαθέσιμο σε όλα τα βιβλιοπωλεία.",
+        "image": "/images/og/book.png",
+        "path": "/book"
+      },
+      "moonlight": {
+        "title": "Moonlight Tales | Το μεγαλύτερο συγγραφικό μπλόγκ | Από το 2013",
+        "description": "Έκδοση συλλογών διηγημάτων, διαδικτυακή πύλη βιβλίων, συγγραφικές συμβουλές σχετικά με την επιμέλεια και διόρθωση βιβλίων.",
+        "image": "/images/og/moonlight.png",
+        "path": "/moonlight"
+      },
+      "paintedBooks": {
+        "title": "Χειροποίητα ζωγραφισμένα βιβλία | Custom special editions",
+        "description": "Όλο και πιο συχνά, οι εκδοτικοί στην Ελλάδα επιλέγουν να κυκλοφορήσουν συλλεκτικές εκδόσεις βιβλίων με ζωγραφισμένες σελίδες. Επειδή, όμως, δεν βγαίνουν έτσι όλα τα βιβλία, πήρα την κατάσταση στα χέρια μου. Εδώ θα βρείτε μερικά από τα βιβλία που έχω ζωγραφίσει μέχρι σήμερα.Ανακαλύψτε τα ζωγραφισμένα βιβλία: μια μοναδική συλλογή όπου η τέχνη συναντά τη λογοτεχνία.",
+        "image": "/images/og/painted-books.png",
+        "path": "/painted-books"
+      }
+    }
+  },
+  "logo": {
+    "src": "/logo.webp",
+    "alt": "Site logo"
+  },
+  "nav": [
+    {
+      "label": "Αρχική",
+      "href": "/"
+    },
+    {
+      "label": "Υπηρεσίες",
+      "href": "/#services"
+    },
+    {
+      "label": "Ένα μόνο γράμμα",
+      "href": "/book"
+    },
+    {
+      "label": "Moonlight Tales",
+      "href": "/moonlight"
+    },
+    {
+      "label": "Ζωγραφισμένα βιβλία",
+      "href": "/painted-books"
+    },
+    {
+      "label": "Εργογραφία",
+      "href": "/timeline"
+    },
+    {
+      "label": "Επικοινωνία",
+      "href": "/#contact"
+    }
+  ],
+  "socials": [
+    {
+      "label": "Facebook",
+      "href": "https://www.facebook.com/share/1Evoke3mqs/",
+      "icon": "/images/common/facebook.svg"
+    },
+    {
+      "label": "Instagram",
+      "href": "https://www.instagram.com/elle._.papadopoulou?igsh=MWN3ZzI4NG8weDds",
+      "icon": "/images/common/instagram.svg"
+    },
+    {
+      "label": "TikTok",
+      "href": "https://www.tiktok.com/@elle._.papadopoulou?_r=1&_t=ZN-91cKWRxhusg",
+      "icon": "/images/common/tiktok.svg"
+    },
+    {
+      "label": "Goodreads",
+      "href": "https://www.goodreads.com/ellepapadopoulou",
+      "icon": "/images/common/goodreads-svgrepo-com.svg"
+    },
+    {
+      "label": "LinkedIn",
+      "href": "https://www.linkedin.com/in/eleni-papadopoulou-30?utm_source=share_via&utm_content=profile&utm_medium=member_android",
+      "icon": "/images/common/linkedin.svg"
+    }
+  ],
+  "footer": {
+    "copyright": "© 2026 Elena Papadopoulou. All rights reserved.",
+    "developer": "Developed with love by SoftAware Studio"
+  }
+}

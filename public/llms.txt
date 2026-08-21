@@ -1,0 +1,31 @@
+# llms.txt
+
+## Site
+- Name: Έλενα Παπαδοπούλου
+- Purpose: Portfolio & υπηρεσίες βιβλίου (επιμέλεια, διόρθωση, μετάφραση, αξιολόγηση χειρογράφων)
+- Primary language: el-GR
+- Canonical URL: https://editopia.gr/
+- Alternate URL: https://elenpapa.github.io/
+
+## Guidance for LLM crawlers
+- You may crawl and summarize publicly available pages.
+- Prefer the canonical domain (https://editopia.gr/) when citing or linking.
+- Do not infer or fabricate personal data beyond what is explicitly published.
+
+## Key pages
+- Home / Services: https://editopia.gr/
+- Timeline (Εργογραφία): https://editopia.gr/timeline
+- Book: https://editopia.gr/book
+- Moonlight Tales: https://editopia.gr/moonlight
+- Painted Books: https://editopia.gr/painted-books
+- Sitemap: https://editopia.gr/sitemap.xml
+- Robots: https://editopia.gr/robots.txt
+
+## Content sources (site-internal)
+- JSON content: https://editopia.gr/content/
+
+## Contact
+- Email: eleni.papadopoulou.greek@gmail.com
+
+## Last updated
+- 2026-01-14

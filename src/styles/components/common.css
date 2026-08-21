@@ -1,0 +1,22 @@
+.cta-button {
+  display: inline-block;
+  padding: 12px 24px;
+  min-height: 44px;
+  min-width: 44px;
+  background: var(--color-primary-600);
+  color: white;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  border-width: 0px;
+}
+
+.cta-button:hover,
+.cta-button:focus-visible {
+  background: var(--color-primary-700);
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: 2px;
+}

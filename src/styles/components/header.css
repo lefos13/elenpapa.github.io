@@ -1,0 +1,534 @@
+@keyframes headerReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pillPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  backdrop-filter: blur(18px);
+  background: linear-gradient(135deg, rgba(179, 157, 219, 0.42), rgba(255, 255, 255, 0.94));
+  border-bottom: 1px solid rgba(179, 157, 219, 0.35);
+  box-shadow: 0 16px 35px rgba(38, 22, 64, 0.12);
+  z-index: 50;
+  animation: var(--nice-animation);
+  transition: var(--nice-transition);
+}
+
+.spacer {
+  height: var(--site-header-height, 76px);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem clamp(1rem, 5vw, 2.75rem);
+  gap: 1rem;
+  min-height: 68px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand img {
+  height: clamp(48px, 12vw, 96px);
+  width: auto;
+  object-fit: contain;
+  display: block;
+  padding: 6px;
+  border-radius: var(--radius-md);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+}
+
+.brand-copy {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.brand-copy .eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.brand-copy .title {
+  margin: 0;
+  font-size: clamp(1rem, 3vw, 1.35rem);
+  font-weight: 600;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.25rem 0;
+}
+
+.hamburger {
+  display: none;
+  background: rgba(179, 157, 219, 0.12);
+  border: 1px solid rgba(179, 157, 219, 0.5);
+  border-radius: 999px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  position: relative;
+  color: var(--color-text);
+  cursor: pointer;
+  z-index: 52;
+}
+
+.hamburger:focus-visible {
+  outline: 2px solid rgba(179, 157, 219, 0.8);
+  outline-offset: 3px;
+}
+
+.hamburger-box {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  gap: 6px;
+}
+
+.hamburger-box span {
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 999px;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.hamburger[aria-expanded='true'] .hamburger-box span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger[aria-expanded='true'] .hamburger-box span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger[aria-expanded='true'] .hamburger-box span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  gap: 0.65rem 0.85rem;
+  margin: 0;
+  padding: 0;
+}
+
+.links a,
+.links .nav-link {
+  color: var(--color-text);
+  font-family: var(--font-serif);
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  padding: 10px 16px;
+  border-radius: 999px;
+  position: relative;
+  border: 1px solid transparent;
+  box-shadow: inset 0 0 0 rgba(179, 157, 219, 0.2);
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    color 0.2s ease,
+    border 0.2s ease,
+    box-shadow 0.2s ease;
+  text-decoration: none;
+}
+
+.links a::after,
+.links .nav-link::after {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4), rgba(179, 157, 219, 0.2));
+  opacity: 0;
+  transform: scale(0.92);
+  z-index: -1;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.links a::before,
+.links .nav-link::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 6px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-600));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+
+.links a:hover,
+.links a:focus-visible,
+.links .nav-link:hover,
+.links .nav-link:focus-visible {
+  border-color: var(--color-text);
+  box-shadow: 0 10px 18px rgba(179, 157, 219, 0.25);
+  outline: none;
+}
+
+.links a:hover::after,
+.links a:focus-visible::after,
+.links .nav-link:hover::after,
+.links .nav-link:focus-visible::after {
+  opacity: 1;
+  transform: scale(1);
+  animation: pillPulse 0.4s ease;
+}
+
+.links a:hover::before,
+.links a:focus-visible::before,
+.links .nav-link:hover::before,
+.links .nav-link:focus-visible::before {
+  transform: scaleX(1);
+}
+
+@media (max-width: 1023px) {
+  .links {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .site-header {
+    box-shadow: 0 8px 20px rgba(38, 22, 64, 0.1);
+  }
+
+  .bar {
+    align-items: center;
+    padding: 0.5rem clamp(0.75rem, 4vw, 1rem);
+    min-height: 60px;
+    gap: 0.75rem;
+  }
+
+  .brand {
+    gap: 0.5rem;
+  }
+
+  .brand img {
+    height: 48px;
+    padding: 4px;
+  }
+
+  .brand-copy .title {
+    font-size: 1rem;
+  }
+
+  .nav {
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .hamburger {
+    display: inline-flex;
+    width: 44px;
+    height: 44px;
+  }
+
+  .hamburger-box {
+    gap: 5px;
+  }
+
+  .hamburger-box span {
+    width: 20px;
+  }
+
+  .links {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(179, 157, 219, 0.97), rgba(255, 255, 255, 0.98));
+    backdrop-filter: blur(24px);
+    gap: 0.25rem;
+    padding: 2rem 1.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-20px);
+    transition:
+      opacity 0.35s ease,
+      visibility 0.35s ease,
+      transform 0.35s ease;
+    z-index: 51;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .links li {
+    width: 100%;
+    max-width: 420px;
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.4s ease,
+      transform 0.4s ease;
+  }
+
+  .links a,
+  .links .nav-link {
+    display: block;
+    width: 100%;
+    padding: 16px 24px;
+    font-size: var(--font-size-lg);
+    min-height: 44px;
+    text-align: center;
+    border: 1px solid rgba(179, 157, 219, 0.4);
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+  }
+
+  .links.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .links.open li {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .links.open li:nth-child(1) {
+    transition-delay: 0.05s;
+  }
+  .links.open li:nth-child(2) {
+    transition-delay: 0.1s;
+  }
+  .links.open li:nth-child(3) {
+    transition-delay: 0.15s;
+  }
+  .links.open li:nth-child(4) {
+    transition-delay: 0.2s;
+  }
+  .links.open li:nth-child(5) {
+    transition-delay: 0.25s;
+  }
+  .links.open li:nth-child(6) {
+    transition-delay: 0.3s;
+  }
+  .links.open li:nth-child(7) {
+    transition-delay: 0.35s;
+  }
+  .links.open li:nth-child(8) {
+    transition-delay: 0.4s;
+  }
+}
+
+@media (max-width: 479px) {
+  .bar {
+    padding: 0.5rem 0.75rem;
+    min-height: 56px;
+  }
+
+  .brand {
+    gap: 0.5rem;
+  }
+
+  .brand img {
+    height: 62px;
+    padding: 3px;
+  }
+
+  .hamburger {
+    width: 44px;
+    height: 44px;
+  }
+
+  .hamburger-box span {
+    width: 18px;
+  }
+
+  .links {
+    padding: 1.5rem 1rem;
+  }
+
+  .links li {
+    max-width: 100%;
+  }
+
+  .links a,
+  .links .nav-link {
+    padding: 14px 20px;
+    font-size: var(--font-size-base);
+  }
+}
+
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .bar {
+    margin-left: 20px;
+  }
+
+  /*
+   * Full nav bar state (not bubble)
+   * GSAP handles the transition animations, CSS just defines the end states
+   */
+  .site-header:not(.bubble) {
+    /* No CSS transitions - GSAP handles morphing */
+    transition: none;
+  }
+
+  .site-header:not(.bubble) .links {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /*
+   * Bubble state - compact floating pill
+   * GSAP animates to these values when scrolling down
+   */
+  .site-header.bubble {
+    top: clamp(0.75rem, 2.5vh, 1.5rem);
+    right: auto;
+    left: 60px;
+    bottom: auto;
+    width: 120px;
+    height: 120px;
+    border-radius: 999px;
+    border-bottom: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-shadow: 0 18px 40px rgba(28, 24, 45, 0.22);
+    /* No CSS transitions - GSAP handles morphing */
+    transition: none;
+  }
+
+  .site-header.bubble .bar {
+    padding: 0;
+    min-height: 0;
+    gap: 0;
+    margin-left: auto;
+  }
+
+  .site-header.bubble .nav {
+    position: relative;
+  }
+
+  .site-header.bubble .brand {
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .site-header.bubble .brand img {
+    padding: 0;
+    height: 67px;
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.12));
+  }
+
+  /* Links in bubble state: hidden by default */
+  .site-header.bubble .links {
+    position: absolute;
+    top: 35px;
+    left: -118px;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(179, 157, 219, 0.3);
+    box-shadow: 0 28px 60px rgba(28, 24, 45, 0.2);
+    width: max-content;
+    max-width: min(50vw, 560px);
+    padding: 0.5rem 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px) scale(0.98);
+    overflow: visible;
+    transform-origin: right top;
+    pointer-events: none;
+    max-height: none;
+    /* NO transition for hover/focus expand because it causes flashes when initial transition occurs */
+    /* transition:
+      opacity 0.25s ease,
+      visibility 0s linear 0.25s,
+      transform 0.25s ease; */
+  }
+
+  .site-header.bubble .links li {
+    width: 100%;
+  }
+
+  .site-header.bubble .links a,
+  .site-header.bubble .links .nav-link {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+  }
+
+  /* Expanded dropdown menu when hovering bubble */
+  .site-header.bubble.expanded .links,
+  .site-header.bubble:focus-within .links {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+    transition:
+      opacity 0.25s ease,
+      visibility 0s linear 0s,
+      transform 0.25s ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .links a,
+  .links,
+  .hamburger-box span {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .site-header.bubble .links {
+    transition: none !important;
+  }
+}
