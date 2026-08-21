@@ -16,7 +16,7 @@ const isSSGBuild = process.env.VITE_SSG === 'true'
 
 // https://vite.dev/config/
 export default defineConfig(({ isSsrBuild }) => ({
-  // Base URL for GitHub Pages / custom domain
+  // Vercel serves the application from the root path for both preview and production deployments.
   base: '/',
   plugins: [
     vue(),

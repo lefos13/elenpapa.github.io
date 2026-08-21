@@ -221,7 +221,7 @@ Before going live:
 6. ⏳ Verify sitemap.xml exists at http://localhost:4173/sitemap.xml
 7. ⏳ Verify robots.txt exists at http://localhost:4173/robots.txt
 8. ⏳ Check meta tags in page source
-9. ⏳ Deploy to GitHub Pages
+9. ⏳ Deploy to Vercel
 10. ⏳ Submit sitemap to Google Search Console
 
 ---
