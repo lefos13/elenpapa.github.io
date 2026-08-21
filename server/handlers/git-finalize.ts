@@ -7,24 +7,29 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { requireAuth } from '../auth-guard.js'
+import { GITHUB_BRANCH } from '../config.js'
 import {
   commitSessionChanges,
   createPullRequestForFinalize,
   createReviewBranch,
+  deleteBranch,
+  isGitHubConfigured,
   readContentFileFromGit,
   type CommitFileEntry,
 } from '../github.js'
-import { readJsonBody, sendJson } from '../http.js'
-
-export interface FinalizeFilePayload {
-  path: string
-  content: unknown
-}
+import { HttpError, isHttpError, readJsonBody, sendJson } from '../http.js'
+import {
+  buildFinalizeCommitFiles,
+  type FinalizeAssetInput,
+  type FinalizeContentInput,
+} from '../serverless-workflow.js'
 
 export interface FinalizeRequestBody {
   sessionPaths?: string[]
   commitMessage?: string
-  files?: FinalizeFilePayload[]
+  files?: FinalizeContentInput[]
+  assets?: FinalizeAssetInput[]
+  deletedPaths?: string[]
 }
 
 export interface FinalizeResultPayload {
@@ -83,19 +88,41 @@ export default async function handleGitFinalize(req: VercelRequest, res: VercelR
   const user = await requireAuth(req, res)
   if (!user) return
 
-  try {
-    const body = await readJsonBody<FinalizeRequestBody>(req)
-    const commitFiles: CommitFileEntry[] = []
+  let branchName = ''
 
-    if (Array.isArray(body?.files) && body.files.length > 0) {
-      for (const item of body.files) {
-        if (!item || typeof item.path !== 'string') continue
-        commitFiles.push({
-          path: normalizeRepoPath(item.path),
-          content: formatContentForCommit(item.content),
-        })
+  try {
+    if (process.env.VERCEL === '1' && !isGitHubConfigured()) {
+      throw new HttpError(
+        503,
+        'Online finalization requires GITHUB_TOKEN, GITHUB_OWNER, and GITHUB_REPO to be configured.',
+      )
+    }
+
+    const body = await readJsonBody<FinalizeRequestBody>(req)
+    let commitFiles: CommitFileEntry[] = buildFinalizeCommitFiles({
+      files: body?.files,
+      assets: body?.assets,
+      deletedPaths: body?.deletedPaths,
+    })
+
+    /**
+     * Every staged JSON file carries the GitHub revision it was loaded from.
+     * Rechecking before branch creation prevents publishing over newer main content.
+     */
+    for (const file of body?.files ?? []) {
+      if (!file?.baseRevision) continue
+      const fileName = normalizeRepoPath(file.path).split('/').pop() || ''
+      const current = await readContentFileFromGit({ filePath: fileName })
+      if (current.sha !== file.baseRevision) {
+        throw new HttpError(
+          409,
+          `"${fileName}" changed in GitHub after it was loaded. Reload it before finalizing.`,
+        )
       }
-    } else if (Array.isArray(body?.sessionPaths) && body.sessionPaths.length > 0) {
+    }
+
+    if (!commitFiles.length && Array.isArray(body?.sessionPaths) && body.sessionPaths.length > 0) {
+      commitFiles = []
       for (const rawPath of body.sessionPaths) {
         if (typeof rawPath !== 'string') continue
         const repoPath = normalizeRepoPath(rawPath)
@@ -122,10 +149,11 @@ export default async function handleGitFinalize(req: VercelRequest, res: VercelR
       return
     }
 
-    const branchName = generateReviewBranchName()
+    branchName = generateReviewBranchName()
     const commitMessage = (body?.commitMessage ?? '').trim() || generateDefaultCommitMessage()
+    const baseBranch = GITHUB_BRANCH || 'main'
 
-    await createReviewBranch({ branchName, baseBranch: 'main' })
+    await createReviewBranch({ branchName, baseBranch })
 
     const commitResult = await commitSessionChanges({
       branch: branchName,
@@ -135,7 +163,7 @@ export default async function handleGitFinalize(req: VercelRequest, res: VercelR
 
     const prResult = await createPullRequestForFinalize({
       branchName,
-      baseBranch: 'main',
+      baseBranch,
       commitMessage,
     })
 
@@ -150,6 +178,15 @@ export default async function handleGitFinalize(req: VercelRequest, res: VercelR
 
     sendJson(res, 200, responsePayload)
   } catch (error) {
+    if (branchName) {
+      await deleteBranch({ branchName }).catch(() => undefined)
+    }
+
+    if (isHttpError(error)) {
+      sendJson(res, error.statusCode, { ok: false, error: error.message, details: error.details })
+      return
+    }
+
     const message = error instanceof Error ? error.message : 'Git finalize workflow failed.'
     sendJson(res, 500, { ok: false, error: message })
   }

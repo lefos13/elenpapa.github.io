@@ -8,9 +8,10 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { requireAuth } from '../auth-guard.js'
-import { calculateGitBlobSha, readContentFileFromGit } from '../github.js'
+import { calculateGitBlobSha, isGitHubConfigured, readContentFileFromGit } from '../github.js'
 import { HttpError, isHttpError, readJsonBody, sendJson } from '../http.js'
 import { buildEditorSchema, validateContentPayload } from '../schemas.js'
+import { getContentSaveStrategy } from '../serverless-workflow.js'
 
 function extractFilePath(req: VercelRequest): string {
   const queryFile = req.query.file
@@ -106,20 +107,31 @@ export default async function handleFilesDetail(req: VercelRequest, res: VercelR
 
       const formattedJson = `${JSON.stringify(payloadContent, null, 2)}\n`
       const nextSha = calculateGitBlobSha(formattedJson)
+      const saveStrategy = getContentSaveStrategy({
+        isVercel: process.env.VERCEL === '1',
+        githubConfigured: isGitHubConfigured(),
+      })
 
-      try {
+      if (saveStrategy === 'unavailable') {
+        throw new HttpError(
+          503,
+          'Online saving requires GITHUB_TOKEN, GITHUB_OWNER, and GITHUB_REPO to be configured.',
+        )
+      }
+
+      if (saveStrategy === 'local-filesystem') {
         const localPath = path.join(process.cwd(), 'public/content', fileName)
         await mkdir(path.dirname(localPath), { recursive: true })
         await writeFile(localPath, formattedJson, 'utf-8')
-      } catch {
-        // In read-only serverless environments, local disk write may not apply
       }
 
       sendJson(res, 200, {
         ok: true,
         file: fileName,
         content: payloadContent,
-        revision: nextSha,
+        revision: saveStrategy === 'local-filesystem' ? nextSha : currentSha,
+        persisted: saveStrategy === 'local-filesystem',
+        storage: saveStrategy,
       })
       return
     }

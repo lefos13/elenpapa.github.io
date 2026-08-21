@@ -104,6 +104,19 @@ portfolio/
 
 ## Architecture & Code Style
 
+### 0. Serverless Save Persistence
+
+GitHub is the only durable production store. `PUT /api/files/:file` validates the payload and its base Git blob SHA, then returns the validated content with `persisted: false`; it must not write to the Vercel function filesystem. The admin SPA retains saved JSON and processed upload variants in the current browser tab and submits them to `POST /api/git/finalize` as one bounded session payload.
+
+Finalization rechecks every content file's base revision before creating a branch, constructs one Git tree containing JSON updates, image blobs, and image deletions, and commits that tree atomically. A failed commit removes the newly created review branch. Local development without GitHub credentials continues to use the filesystem-backed server.
+
+Operational consequences:
+
+- Editors must finalize saved online changes before closing or reloading the admin tab.
+- `GITHUB_TOKEN`, `GITHUB_OWNER`, and `GITHUB_REPO` are mandatory for online saves and finalization; missing configuration returns `503`.
+- Uploaded image previews use the in-memory processed primary variant until GitHub and Vercel publish the asset.
+- Optimistic concurrency remains anchored to the GitHub blob SHA loaded before editing and is checked both on Save and Finalize.
+
 ### 1. In-Memory Image Optimization (Serverless Sharp)
 
 ```ts

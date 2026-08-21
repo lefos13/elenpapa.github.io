@@ -234,11 +234,14 @@ function renderNode(value, onReplace, context) {
           onStatus('Uploading image and running optimizer...', 'dirty')
 
           try {
-            const imagePath = await uploadImage({
+            const uploadResult = await uploadImage({
               file: selected,
               fieldPath: pathSegments.join('.'),
               previousImagePath: input.value,
             })
+            const imagePath =
+              typeof uploadResult === 'string' ? uploadResult : uploadResult?.imagePath
+            if (!imagePath) throw new Error('Image upload returned no usable path.')
             if (isManagedImagePublicPath(input.value) && input.value !== imagePath) {
               onMarkImageForDeletion(input.value)
             }

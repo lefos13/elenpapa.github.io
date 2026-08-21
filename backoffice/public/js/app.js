@@ -24,6 +24,14 @@ import { bindShortcuts } from './app/shortcuts.js'
 import { saveDraft, loadDraft, clearDraft } from './app/draft-recovery.js'
 import { createToastController } from './app/toasts.js'
 import { buildLocalSemanticSummary } from './app/semantic-summary.js'
+import {
+  buildSessionFinalizePayload,
+  clearSessionChanges,
+  createSessionChanges,
+  registerPendingUpload,
+  resolveSessionContent,
+  stageContentChange,
+} from './app/session-changes.js'
 import { UiStatusState, getStatusView } from './app/ui-status.js'
 import { createState, isSectionCollapsed, setSectionCollapsed } from './state.js'
 import { areValuesEqual, cloneValue, toRepoPathFromPublicImagePath } from './utils.js'
@@ -33,6 +41,7 @@ import { renderImagesLibrary } from './features/images/library.js'
 
 export function createBackofficeApp(elements) {
   const state = createState()
+  const sessionChanges = createSessionChanges()
   const toasts = createToastController(elements.toastRoot)
   let imageSearchDebounceTimer = null
   let draftPersistTimer = null
@@ -468,14 +477,17 @@ export function createBackofficeApp(elements) {
           setUiStatus(normalizeStatusMode(mode), message),
         onMarkImageForDeletion: (imagePath) => state.deletedImages.add(imagePath),
         uploadImage: async ({ file, fieldPath, previousImagePath }) => {
-          const imagePath = await uploadImageAsset({
+          const upload = await uploadImageAsset({
             file,
             activeFile: state.activeFile,
             fieldPath,
             previousImagePath,
           })
-          markSessionPath(toRepoPathFromPublicImagePath(imagePath))
-          return imagePath
+          registerPendingUpload(sessionChanges, upload)
+          if (!upload.variants.length) {
+            markSessionPath(toRepoPathFromPublicImagePath(upload.imagePath))
+          }
+          return upload
         },
       })
       return
@@ -490,14 +502,17 @@ export function createBackofficeApp(elements) {
         setUiStatus(normalizeStatusMode(mode), message),
       onMarkImageForDeletion: (imagePath) => state.deletedImages.add(imagePath),
       uploadImage: async ({ file, fieldPath, previousImagePath }) => {
-        const imagePath = await uploadImageAsset({
+        const upload = await uploadImageAsset({
           file,
           activeFile: state.activeFile,
           fieldPath,
           previousImagePath,
         })
-        markSessionPath(toRepoPathFromPublicImagePath(imagePath))
-        return imagePath
+        registerPendingUpload(sessionChanges, upload)
+        if (!upload.variants.length) {
+          markSessionPath(toRepoPathFromPublicImagePath(upload.imagePath))
+        }
+        return upload
       },
     })
   }
@@ -544,7 +559,8 @@ export function createBackofficeApp(elements) {
       if (!confirmed) return
     }
 
-    const filePayload = await fetchFileContent(filePath)
+    const remoteFilePayload = await fetchFileContent(filePath)
+    const filePayload = resolveSessionContent(sessionChanges, filePath, remoteFilePayload)
     const schema = await fetchSchema(filePayload.schemaId || filePath)
 
     state.activeFile = filePath
@@ -629,6 +645,7 @@ export function createBackofficeApp(elements) {
     const deletedImagesSnapshot = Array.from(state.deletedImages)
     const originalSnapshot = cloneValue(state.originalValue)
     const draftSnapshot = cloneValue(state.draftValue)
+    const baseRevision = state.activeRevision
 
     setUiStatus(UiStatusState.SAVING, 'Saving file and finalizing pending image updates...')
 
@@ -646,13 +663,24 @@ export function createBackofficeApp(elements) {
         ? saveResult.content
         : draftSnapshot
 
-    const latestFilePayload = await fetchFileContent(state.activeFile)
-    const persistedContent = latestFilePayload.content
+    let latestFilePayload = null
+    let persistedContent = expectedPersistedContent
+    if (saveResult.persisted !== false) {
+      latestFilePayload = await fetchFileContent(state.activeFile)
+      persistedContent = latestFilePayload.content
+    }
     if (!areValuesEqual(persistedContent, expectedPersistedContent)) {
       throw new Error(
-        'Save verification failed because on-disk content differs from the current editor state. Reload and try again.',
+        'Save verification failed because persisted content differs from the current editor state. Reload and try again.',
       )
     }
+
+    stageContentChange(sessionChanges, {
+      filePath: state.activeFile,
+      content: persistedContent,
+      baseRevision: saveResult.revision || baseRevision,
+      deletedImages: deletedImagesSnapshot,
+    })
 
     const semanticEntries = buildLocalSemanticSummary({
       before: originalSnapshot,
@@ -662,16 +690,22 @@ export function createBackofficeApp(elements) {
     state.sessionSemanticChanges.set(state.activeFile, semanticEntries)
     state.originalValue = cloneValue(persistedContent)
     state.draftValue = cloneValue(persistedContent)
-    state.activeRevision = saveResult.revision || latestFilePayload.revision || state.activeRevision
+    state.activeRevision = saveResult.revision || latestFilePayload?.revision || state.activeRevision
     state.validationIssues = []
     state.deletedImages.clear()
 
-    clearDraft({ filePath: state.activeFile, revision: state.activeRevision })
+    clearDraft({ filePath: state.activeFile, revision: baseRevision })
 
     markSessionPath(`public/content/${state.activeFile}`)
     deletedImagesSnapshot.forEach((publicPath) => {
       markSessionPath(toRepoPathFromPublicImagePath(publicPath))
     })
+
+    const finalizePayload = buildSessionFinalizePayload(
+      sessionChanges,
+      state.sessionTouchedPaths,
+    )
+    finalizePayload.assets.forEach((asset) => markSessionPath(asset.path))
 
     if (saveResult && Array.isArray(saveResult.finalizedImages)) {
       saveResult.finalizedImages.forEach((entry) => {
@@ -688,8 +722,12 @@ export function createBackofficeApp(elements) {
     syncDirtyState()
     syncToolbarState()
     renderFileList()
-    setUiStatus(UiStatusState.SYNCED, 'Saved successfully. You can now create a review branch.')
-    toasts.show({ message: 'Content saved successfully.', type: 'ok' })
+    const saveMessage =
+      saveResult.persisted === false
+        ? 'Saved in this review session. Finalize before closing this tab.'
+        : 'Saved successfully. You can now create a review branch.'
+    setUiStatus(UiStatusState.SYNCED, saveMessage)
+    toasts.show({ message: saveMessage, type: 'ok' })
   }
 
   async function refreshGitStatus({ reloadActiveOnPull = true } = {}) {
@@ -744,7 +782,9 @@ export function createBackofficeApp(elements) {
     }
 
     await runGitTask('finalize', async () => {
-      const result = await finalizeGitReview(sessionPaths)
+      const result = await finalizeGitReview(
+        buildSessionFinalizePayload(sessionChanges, sessionPaths),
+      )
       closeModal(elements.reviewModal)
       reviewCanFinalize = false
 
@@ -771,6 +811,7 @@ export function createBackofficeApp(elements) {
       state.sessionTouchedPaths.clear()
       state.sessionSemanticChanges.clear()
       state.hasSessionChanges = false
+      clearSessionChanges(sessionChanges)
 
       syncToolbarState()
       await refreshGitStatus({ reloadActiveOnPull: false })
@@ -1022,6 +1063,16 @@ export function createBackofficeApp(elements) {
 
     window.addEventListener('backoffice:unauthorized', () => {
       showLoginModal('Session expired or unauthorized. Please sign in again.')
+    })
+
+    /**
+     * Online saves live in the current browser session until GitHub finalization.
+     * The native navigation warning prevents accidental loss during that interval.
+     */
+    window.addEventListener('beforeunload', (event) => {
+      if (!state.dirty && !state.hasSessionChanges) return
+      event.preventDefault()
+      event.returnValue = ''
     })
 
     document.addEventListener('keydown', (event) => {

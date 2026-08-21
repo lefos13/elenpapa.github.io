@@ -75,6 +75,10 @@ export async function fetchImages(query) {
 export async function fetchFileContent(filePath) {
   const encodedFile = encodeURIComponent(filePath)
   const payload = await apiRequest(`/api/files/${encodedFile}`)
+  /**
+   * The editor needs both the public content path and processed bytes: the path
+   * updates JSON while the bytes remain staged for the eventual GitHub commit.
+   */
   return {
     content: payload.content,
     revision: payload.revision || '',
@@ -142,7 +146,29 @@ export async function uploadImageAsset({ file, activeFile, fieldPath, previousIm
     }),
   })
 
-  return payload.imagePath
+  const variants = Array.isArray(payload.variants) ? payload.variants : []
+  const primaryVariant = variants.find((variant) => variant.publicPath === payload.imagePath)
+  const extension = String(payload.imagePath || '')
+    .split('.')
+    .pop()
+    ?.toLowerCase()
+  const mimeByExtension = {
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    jfif: 'image/jpeg',
+    webp: 'image/webp',
+    svg: 'image/svg+xml',
+  }
+
+  return {
+    imagePath: payload.imagePath,
+    variants,
+    previewUrl:
+      primaryVariant?.bufferBase64 && mimeByExtension[extension]
+        ? `data:${mimeByExtension[extension]};base64,${primaryVariant.bufferBase64}`
+        : payload.imagePath,
+  }
 }
 
 export async function fetchGitStatus() {
@@ -159,11 +185,12 @@ export async function fetchGitPreview(sessionPaths) {
   return payload.preview
 }
 
-export async function finalizeGitReview(sessionPaths) {
+export async function finalizeGitReview(changes) {
+  const body = Array.isArray(changes) ? { sessionPaths: changes } : changes
   const payload = await apiRequest('/api/git/finalize', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ sessionPaths }),
+    body: JSON.stringify(body),
   })
   return payload.result
 }

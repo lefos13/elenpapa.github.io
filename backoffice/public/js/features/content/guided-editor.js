@@ -429,17 +429,24 @@ function renderGuidedNode({
     uploadButton.disabled = true
     onStatus('Uploading image and processing variants. Please wait...', 'saving')
     try {
-      const imagePath = await uploadImage({
+      const uploadResult = await uploadImage({
         file: selected,
         fieldPath,
         previousImagePath: input.value,
       })
+      const imagePath =
+        typeof uploadResult === 'string' ? uploadResult : uploadResult?.imagePath
+      const previewUrl =
+        typeof uploadResult === 'object' && uploadResult?.previewUrl
+          ? uploadResult.previewUrl
+          : imagePath
+      if (!imagePath) throw new Error('Image upload returned no usable path.')
       if (isManagedImagePublicPath(input.value) && input.value !== imagePath) {
         onMarkImageForDeletion(input.value)
       }
       input.value = imagePath
       preview.hidden = !isManagedImagePublicPath(imagePath)
-      if (!preview.hidden) preview.src = imagePath
+      if (!preview.hidden) preview.src = previewUrl
       tempBadge.hidden = !String(imagePath).includes('-temp')
       onReplace(imagePath, { rerender: false })
       onStatus('Image uploaded. Save to finalize this change.', 'unsaved')

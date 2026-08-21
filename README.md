@@ -94,9 +94,11 @@ Configure these variables in **Vercel Project Settings > Environment Variables**
 
 1. **Access Admin UI**: Open `https://your-domain.com/admin`.
 2. **Sign In**: Enter the configured `ADMIN_PASSWORD` to receive a secure session cookie.
-3. **Edit Content & Upload Media**: Modify any of the 10 content files or upload new images. Raster images are automatically converted to optimized `.webp` with responsive variants in-memory.
-4. **Finalize & Review**: Click **Create Review Branch** / **Finalize & Push** to commit changes to a new review branch (`ui-backoffice-YYYY-MM-DD-xxxx`) and automatically create a GitHub Pull Request.
+3. **Edit, Upload & Save**: Modify any of the 10 content files or upload new images. Raster images are converted to optimized `.webp` variants in-memory. **Save** validates each edit and stages its JSON and processed image bytes in the current browser tab; Vercel's function filesystem is never treated as durable storage.
+4. **Finalize & Review**: Without reloading or closing the tab, click **Create Review Branch** / **Finalize & Push** to commit all staged JSON, image variants, and image deletions atomically to a new review branch (`ui-backoffice-YYYY-MM-DD-xxxx`) and automatically create a GitHub Pull Request.
 5. **Automatic Publishing**: Vercel generates a preview deployment for the review branch. Merging the PR into `main` triggers Vercel CI/CD (`vite-ssg build`), instantly updating the live static site.
+
+If any required GitHub variable is missing, online saves/finalization return a configuration error instead of reporting a false success. Saved online changes remain browser-staged until finalization, so finalize them before closing or reloading the admin tab.
 
 ### Lint with [ESLint](https://eslint.org/)
 

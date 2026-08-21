@@ -339,11 +339,11 @@ async function handleAuthSession(req, res) {
 
 // server/handlers/files-detail.ts
 import { mkdir as mkdir2, writeFile as writeFile2 } from "node:fs/promises";
-import path3 from "node:path";
+import path4 from "node:path";
 
 // server/github.ts
 import { createHash } from "node:crypto";
-import { readdir, readFile, stat, writeFile, mkdir } from "node:fs/promises";
+import { mkdir, readdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Octokit } from "@octokit/rest";
 var cachedOctokit = null;
@@ -720,10 +720,35 @@ async function commitSessionChanges({
         commit_sha: baseCommitSha
       });
       const baseTreeSha = commitData.tree.sha;
+      const deletionPaths = files.filter((file) => file.content === null).map((file) => file.path.replace(/\\/g, "/").replace(/^\/+/, "").replace(/^\.\//, ""));
+      let existingPaths = null;
+      if (deletionPaths.length > 0) {
+        const { data: baseTree } = await octokit.git.getTree({
+          owner,
+          repo,
+          tree_sha: baseTreeSha,
+          recursive: "1"
+        });
+        existingPaths = new Set(
+          (baseTree.tree || []).filter((item) => item.type === "blob" && typeof item.path === "string").map((item) => item.path)
+        );
+      }
       const treeItems = await Promise.all(
-        files.map(async (file) => {
-          const isBuffer = Buffer.isBuffer(file.content);
+        files.filter((file) => {
+          if (file.content !== null) return true;
           const cleanPath = file.path.replace(/\\/g, "/").replace(/^\/+/, "").replace(/^\.\//, "");
+          return existingPaths?.has(cleanPath);
+        }).map(async (file) => {
+          const cleanPath = file.path.replace(/\\/g, "/").replace(/^\/+/, "").replace(/^\.\//, "");
+          if (file.content === null) {
+            return {
+              path: cleanPath,
+              mode: "100644",
+              type: "blob",
+              sha: null
+            };
+          }
+          const isBuffer = Buffer.isBuffer(file.content);
           const contentStr = isBuffer ? file.content.toString("base64") : typeof file.content === "string" ? file.content : String(file.content);
           const { data: blob } = await octokit.git.createBlob({
             owner,
@@ -771,6 +796,15 @@ async function commitSessionChanges({
   for (const file of files) {
     const cleanPath = file.path.replace(/\\/g, "/").replace(/^\/+/, "").replace(/^\.\//, "");
     const fullPath = path.join(process.cwd(), cleanPath);
+    if (file.content === null) {
+      try {
+        await unlink(fullPath);
+      } catch (error) {
+        const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "";
+        if (code !== "ENOENT") throw error;
+      }
+      continue;
+    }
     await mkdir(path.dirname(fullPath), { recursive: true });
     if (Buffer.isBuffer(file.content)) {
       await writeFile(fullPath, file.content);
@@ -830,6 +864,30 @@ async function createPullRequestForFinalize({
     return {
       created: false,
       warning: `Review branch pushed successfully, but Pull Request creation failed: ${message}`
+    };
+  }
+}
+async function deleteBranch({
+  branchName,
+  owner = GITHUB_OWNER,
+  repo = GITHUB_REPO
+}) {
+  if (!isGitHubConfigured()) {
+    return { deleted: true };
+  }
+  const octokit = getOctokit();
+  try {
+    await octokit.git.deleteRef({
+      owner,
+      repo,
+      ref: `heads/${branchName}`
+    });
+    return { deleted: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return {
+      deleted: false,
+      warning: `Failed to delete branch "${branchName}": ${message}`
     };
   }
 }
@@ -1468,6 +1526,80 @@ function collectImageUsages(value, jsonPath = "", output = []) {
   return output;
 }
 
+// server/serverless-workflow.ts
+import path3 from "node:path";
+function getContentSaveStrategy({
+  isVercel,
+  githubConfigured
+}) {
+  if (githubConfigured) return "browser-session";
+  return isVercel ? "unavailable" : "local-filesystem";
+}
+function normalizeManagedPath(filePath, kind) {
+  const clean = String(filePath ?? "").trim().replace(/\\/g, "/").replace(/^\/+/, "");
+  const normalized = path3.posix.normalize(clean);
+  if (!normalized || normalized === "." || normalized.startsWith("../") || normalized.includes("/../")) {
+    throw new HttpError(400, `Invalid managed ${kind} path.`);
+  }
+  const isContent = kind === "content" && normalized.startsWith("public/content/") && normalized.endsWith(".json");
+  const isAsset = kind === "asset" && normalized.startsWith("public/images/") && /\.(png|jpe?g|jfif|webp|svg)$/i.test(normalized);
+  if (!isContent && !isAsset) {
+    throw new HttpError(400, `Path is outside the managed ${kind} directory.`);
+  }
+  return normalized;
+}
+function buildFinalizeCommitFiles({
+  files = [],
+  assets = [],
+  deletedPaths = []
+}) {
+  const commitFiles = /* @__PURE__ */ new Map();
+  for (const file of files) {
+    if (!file || typeof file.path !== "string") continue;
+    const repoPath = normalizeManagedPath(file.path, "content");
+    commitFiles.set(repoPath, {
+      path: repoPath,
+      content: typeof file.content === "string" ? file.content : `${JSON.stringify(file.content, null, 2)}
+`
+    });
+  }
+  for (const asset of assets) {
+    if (!asset || typeof asset.path !== "string" || typeof asset.bufferBase64 !== "string") {
+      continue;
+    }
+    const repoPath = normalizeManagedPath(asset.path, "asset");
+    const buffer = Buffer.from(asset.bufferBase64, "base64");
+    if (!buffer.length) {
+      throw new HttpError(400, `Uploaded asset "${repoPath}" is empty.`);
+    }
+    commitFiles.set(repoPath, { path: repoPath, content: buffer });
+  }
+  for (const deletedPath of deletedPaths) {
+    if (typeof deletedPath !== "string") continue;
+    const repoPath = normalizeManagedPath(deletedPath, "asset");
+    commitFiles.set(repoPath, { path: repoPath, content: null });
+    const parsed = path3.posix.parse(repoPath);
+    const relativeDirectory = parsed.dir.replace(/^public\/images\/?/, "");
+    const supportsResponsiveVariants = [
+      "posts",
+      "posts/webp",
+      "books",
+      "painted-books",
+      "moonlight"
+    ].some(
+      (directory) => relativeDirectory === directory || relativeDirectory.startsWith(`${directory}/`)
+    );
+    if (supportsResponsiveVariants && parsed.ext.toLowerCase() === ".webp") {
+      const canonicalName = parsed.name.replace(/-\d+w$/i, "");
+      for (const width of [400, 800]) {
+        const variantPath = path3.posix.join(parsed.dir, `${canonicalName}-${width}w.webp`);
+        commitFiles.set(variantPath, { path: variantPath, content: null });
+      }
+    }
+  }
+  return Array.from(commitFiles.values());
+}
+
 // server/handlers/files-detail.ts
 function extractFilePath(req) {
   const queryFile = req.query.file;
@@ -1482,8 +1614,8 @@ function extractFilePath(req) {
   if (!rawFile || typeof rawFile !== "string") {
     throw new HttpError(400, "Missing or invalid file parameter.");
   }
-  const normalized = path3.normalize(rawFile).replace(/\\/g, "/");
-  const baseName = path3.basename(normalized);
+  const normalized = path4.normalize(rawFile).replace(/\\/g, "/");
+  const baseName = path4.basename(normalized);
   if (normalized.includes("..") || normalized.startsWith("/") || !baseName) {
     throw new HttpError(400, "Invalid content file path.");
   }
@@ -1541,17 +1673,28 @@ async function handleFilesDetail(req, res) {
       const formattedJson = `${JSON.stringify(payloadContent, null, 2)}
 `;
       const nextSha = calculateGitBlobSha(formattedJson);
-      try {
-        const localPath = path3.join(process.cwd(), "public/content", fileName);
-        await mkdir2(path3.dirname(localPath), { recursive: true });
+      const saveStrategy = getContentSaveStrategy({
+        isVercel: process.env.VERCEL === "1",
+        githubConfigured: isGitHubConfigured()
+      });
+      if (saveStrategy === "unavailable") {
+        throw new HttpError(
+          503,
+          "Online saving requires GITHUB_TOKEN, GITHUB_OWNER, and GITHUB_REPO to be configured."
+        );
+      }
+      if (saveStrategy === "local-filesystem") {
+        const localPath = path4.join(process.cwd(), "public/content", fileName);
+        await mkdir2(path4.dirname(localPath), { recursive: true });
         await writeFile2(localPath, formattedJson, "utf-8");
-      } catch {
       }
       sendJson(res, 200, {
         ok: true,
         file: fileName,
         content: payloadContent,
-        revision: nextSha
+        revision: saveStrategy === "local-filesystem" ? nextSha : currentSha,
+        persisted: saveStrategy === "local-filesystem",
+        storage: saveStrategy
       });
       return;
     }
@@ -1574,7 +1717,7 @@ async function handleFilesDetail(req, res) {
 
 // server/handlers/files-index.ts
 import { stat as stat2 } from "node:fs/promises";
-import path4 from "node:path";
+import path5 from "node:path";
 async function handleFilesIndex(req, res) {
   if (req.method !== "GET" && req.method !== "HEAD") {
     sendJson(res, 405, { ok: false, error: "Method not allowed" });
@@ -1586,7 +1729,7 @@ async function handleFilesIndex(req, res) {
     await Promise.all(
       files.map(async (file) => {
         try {
-          const filePath = path4.join(process.cwd(), "public/content", file);
+          const filePath = path5.join(process.cwd(), "public/content", file);
           const fileStat = await stat2(filePath);
           statsMap[file] = {
             size: fileStat.size,
@@ -1657,18 +1800,33 @@ async function handleGitFinalize(req, res) {
   }
   const user = await requireAuth(req, res);
   if (!user) return;
+  let branchName = "";
   try {
+    if (process.env.VERCEL === "1" && !isGitHubConfigured()) {
+      throw new HttpError(
+        503,
+        "Online finalization requires GITHUB_TOKEN, GITHUB_OWNER, and GITHUB_REPO to be configured."
+      );
+    }
     const body = await readJsonBody(req);
-    const commitFiles = [];
-    if (Array.isArray(body?.files) && body.files.length > 0) {
-      for (const item of body.files) {
-        if (!item || typeof item.path !== "string") continue;
-        commitFiles.push({
-          path: normalizeRepoPath(item.path),
-          content: formatContentForCommit(item.content)
-        });
+    let commitFiles = buildFinalizeCommitFiles({
+      files: body?.files,
+      assets: body?.assets,
+      deletedPaths: body?.deletedPaths
+    });
+    for (const file of body?.files ?? []) {
+      if (!file?.baseRevision) continue;
+      const fileName = normalizeRepoPath(file.path).split("/").pop() || "";
+      const current = await readContentFileFromGit({ filePath: fileName });
+      if (current.sha !== file.baseRevision) {
+        throw new HttpError(
+          409,
+          `"${fileName}" changed in GitHub after it was loaded. Reload it before finalizing.`
+        );
       }
-    } else if (Array.isArray(body?.sessionPaths) && body.sessionPaths.length > 0) {
+    }
+    if (!commitFiles.length && Array.isArray(body?.sessionPaths) && body.sessionPaths.length > 0) {
+      commitFiles = [];
       for (const rawPath of body.sessionPaths) {
         if (typeof rawPath !== "string") continue;
         const repoPath = normalizeRepoPath(rawPath);
@@ -1692,9 +1850,10 @@ async function handleGitFinalize(req, res) {
       });
       return;
     }
-    const branchName = generateReviewBranchName();
+    branchName = generateReviewBranchName();
     const commitMessage = (body?.commitMessage ?? "").trim() || generateDefaultCommitMessage();
-    await createReviewBranch({ branchName, baseBranch: "main" });
+    const baseBranch = GITHUB_BRANCH || "main";
+    await createReviewBranch({ branchName, baseBranch });
     const commitResult = await commitSessionChanges({
       branch: branchName,
       files: commitFiles,
@@ -1702,7 +1861,7 @@ async function handleGitFinalize(req, res) {
     });
     const prResult = await createPullRequestForFinalize({
       branchName,
-      baseBranch: "main",
+      baseBranch,
       commitMessage
     });
     const responsePayload = {
@@ -1715,13 +1874,20 @@ async function handleGitFinalize(req, res) {
     };
     sendJson(res, 200, responsePayload);
   } catch (error) {
+    if (branchName) {
+      await deleteBranch({ branchName }).catch(() => void 0);
+    }
+    if (isHttpError(error)) {
+      sendJson(res, error.statusCode, { ok: false, error: error.message, details: error.details });
+      return;
+    }
     const message = error instanceof Error ? error.message : "Git finalize workflow failed.";
     sendJson(res, 500, { ok: false, error: message });
   }
 }
 
 // server/handlers/git-preview.ts
-import path5 from "node:path";
+import path6 from "node:path";
 function normalizeSessionPaths(sessionPaths) {
   if (!Array.isArray(sessionPaths)) return [];
   const unique = /* @__PURE__ */ new Set();
@@ -1729,7 +1895,7 @@ function normalizeSessionPaths(sessionPaths) {
     if (typeof item !== "string") continue;
     const clean = item.trim().replace(/\\/g, "/").replace(/^\/+/, "").replace(/^\.\//, "");
     if (!clean) continue;
-    const normalized = path5.posix.normalize(clean);
+    const normalized = path6.posix.normalize(clean);
     if (!normalized || normalized === "." || normalized.startsWith("../") || normalized.includes("/../")) {
       continue;
     }
@@ -1852,7 +2018,7 @@ async function handleImagesIndex(req, res) {
 }
 
 // server/handlers/schemas-detail.ts
-import path6 from "node:path";
+import path7 from "node:path";
 function extractSchemaId(req) {
   const queryId = req.query.id;
   let rawId = Array.isArray(queryId) ? queryId[0] : queryId;
@@ -1866,8 +2032,8 @@ function extractSchemaId(req) {
   if (!rawId || typeof rawId !== "string") {
     throw new HttpError(400, "Missing or invalid schema id parameter.");
   }
-  const normalized = path6.normalize(rawId).replace(/\\/g, "/");
-  const baseName = path6.basename(normalized);
+  const normalized = path7.normalize(rawId).replace(/\\/g, "/");
+  const baseName = path7.basename(normalized);
   if (normalized.includes("..") || normalized.startsWith("/") || !baseName) {
     throw new HttpError(400, "Invalid schema id.");
   }
@@ -1903,7 +2069,7 @@ async function handleSchemasDetail(req, res) {
 }
 
 // server/handlers/session-summary.ts
-import path7 from "node:path";
+import path8 from "node:path";
 function parseQueryPaths(raw) {
   if (!raw) return [];
   const list = [];
@@ -1920,7 +2086,7 @@ function parseQueryPaths(raw) {
   for (const item of list) {
     const clean = item.trim().replace(/\\/g, "/").replace(/^\/+/, "");
     if (!clean) continue;
-    const normalized = path7.posix.normalize(clean);
+    const normalized = path8.posix.normalize(clean);
     if (!normalized || normalized === "." || normalized.startsWith("../") || normalized.includes("/../")) {
       continue;
     }
@@ -1937,7 +2103,7 @@ async function handleSessionSummary(req, res) {
     const rawPaths = req.query.paths;
     const touchedPaths = parseQueryPaths(rawPaths);
     const changedEntries = touchedPaths.map((itemPath) => {
-      const fileName = path7.posix.basename(itemPath);
+      const fileName = path8.posix.basename(itemPath);
       let type = "unknown";
       if (itemPath.includes("content/") || itemPath.endsWith(".json")) {
         type = "content";
@@ -1967,7 +2133,7 @@ async function handleSessionSummary(req, res) {
 }
 
 // server/image-processor.ts
-import path8 from "node:path";
+import path9 from "node:path";
 import sharp from "sharp";
 var RESPONSIVE_FOLDERS = {
   posts: true,
@@ -1979,7 +2145,7 @@ var RESPONSIVE_FOLDERS = {
 var RESPONSIVE_WIDTHS = [400, 800];
 function sanitizeFileName(filename) {
   const normalized = String(filename ?? "").trim().replace(/\\/g, "/");
-  const parsed = path8.posix.parse(normalized);
+  const parsed = path9.posix.parse(normalized);
   const safeName = parsed.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^\p{L}\p{N}.-]+/gu, "-").replace(/_/g, "-").replace(/-+/g, "-").replace(/^[-_.]+|[-_.]+$/g, "");
   const safeExt = parsed.ext.toLowerCase();
   if (!ALLOWED_IMAGE_EXTENSIONS.has(safeExt)) {
@@ -1995,7 +2161,7 @@ function sanitizeFileName(filename) {
 }
 function buildUniqueImageName(safeName, ext = ".webp") {
   const normalized = safeName.replace(/\\/g, "/");
-  const parsed = path8.posix.parse(normalized);
+  const parsed = path9.posix.parse(normalized);
   const baseName = parsed.name || safeName;
   const normalizedExt = ext.startsWith(".") ? ext.toLowerCase() : `.${ext.toLowerCase()}`;
   return `${baseName}-${Date.now()}${normalizedExt}`;
@@ -2005,11 +2171,11 @@ function resolveFolderFromPreviousPath(previousImagePath) {
     return "";
   }
   const relativePath = previousImagePath.replace(/^\/images\//, "");
-  const normalizedPath = path8.posix.normalize(relativePath);
+  const normalizedPath = path9.posix.normalize(relativePath);
   if (!normalizedPath || normalizedPath.startsWith("../") || normalizedPath.includes("/../")) {
     return "";
   }
-  const directory = path8.posix.dirname(normalizedPath);
+  const directory = path9.posix.dirname(normalizedPath);
   return directory === "." ? "root" : directory;
 }
 function getImageDestinationFolder(options = {}) {
@@ -2018,7 +2184,7 @@ function getImageDestinationFolder(options = {}) {
   if (previousFolder) {
     return previousFolder;
   }
-  const fileName = activeFile ? path8.posix.basename(activeFile.replace(/\\/g, "/")) : "";
+  const fileName = activeFile ? path9.posix.basename(activeFile.replace(/\\/g, "/")) : "";
   const normalizedFieldPath = String(fieldPath ?? "").trim();
   if (fileName && normalizedFieldPath) {
     const matchingOverride = FOLDER_OVERRIDE_RULES.find(
@@ -2034,7 +2200,7 @@ function getImageDestinationFolder(options = {}) {
   return "common";
 }
 function shouldKeepOriginalFormat(options) {
-  const fileName = options.activeFile ? path8.posix.basename(options.activeFile.replace(/\\/g, "/")) : "";
+  const fileName = options.activeFile ? path9.posix.basename(options.activeFile.replace(/\\/g, "/")) : "";
   const normalizedFieldPath = String(options.fieldPath ?? "").trim();
   if (!fileName || !normalizedFieldPath) return false;
   return ORIGINAL_PATH_RULES.some(
@@ -2051,7 +2217,7 @@ async function processUploadedImage(options) {
     throw new HttpError(400, `Image is too large. Maximum upload size is ${maxMb} MB.`);
   }
   const sanitized = sanitizeFileName(originalFilename);
-  const parsedSafe = path8.posix.parse(sanitized);
+  const parsedSafe = path9.posix.parse(sanitized);
   const originalExt = parsedSafe.ext.toLowerCase();
   const baseName = parsedSafe.name;
   const folder = getImageDestinationFolder({ activeFile, fieldPath, previousImagePath });
@@ -2124,7 +2290,7 @@ async function processUploadedImage(options) {
   const variants = [primaryVariant];
   const isResponsive = Boolean(RESPONSIVE_FOLDERS[folder]) || Object.keys(RESPONSIVE_FOLDERS).some((target) => folder.startsWith(`${target}/`));
   if (isResponsive && !keepOriginal) {
-    const uniqueBase = path8.posix.parse(primaryUniqueName).name;
+    const uniqueBase = path9.posix.parse(primaryUniqueName).name;
     for (const targetWidth of RESPONSIVE_WIDTHS) {
       const wBuffer = await sharp(buffer).resize({ width: targetWidth, withoutEnlargement: true }).webp({ quality: 80, effort: 4 }).toBuffer();
       const wMeta = await sharp(wBuffer).metadata();
@@ -2211,7 +2377,7 @@ async function handleUploadImage(req, res) {
 }
 
 // server/handlers/validate-file.ts
-import path9 from "node:path";
+import path10 from "node:path";
 function extractFilePath2(req) {
   const queryFile = req.query.file;
   let rawFile = Array.isArray(queryFile) ? queryFile[0] : queryFile;
@@ -2225,8 +2391,8 @@ function extractFilePath2(req) {
   if (!rawFile || typeof rawFile !== "string") {
     throw new HttpError(400, "Missing or invalid file parameter.");
   }
-  const normalized = path9.normalize(rawFile).replace(/\\/g, "/");
-  const baseName = path9.basename(normalized);
+  const normalized = path10.normalize(rawFile).replace(/\\/g, "/");
+  const baseName = path10.basename(normalized);
   if (normalized.includes("..") || normalized.startsWith("/") || !baseName) {
     throw new HttpError(400, "Invalid content file path.");
   }

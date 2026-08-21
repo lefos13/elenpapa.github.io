@@ -7,7 +7,7 @@
  */
 
 import { createHash } from 'node:crypto'
-import { readdir, readFile, stat, writeFile, mkdir } from 'node:fs/promises'
+import { mkdir, readdir, readFile, stat, unlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { Octokit } from '@octokit/rest'
 import {
@@ -557,7 +557,7 @@ export async function createReviewBranch({
 
 export interface CommitFileEntry {
   path: string
-  content: string | Buffer
+  content: string | Buffer | null
 }
 
 export interface CommitSessionChangesParams {
@@ -608,11 +608,51 @@ export async function commitSessionChanges({
       })
       const baseTreeSha = commitData.tree.sha
 
+      /**
+       * Responsive cleanup may name variants absent from older content. Filtering
+       * deletions against the base tree keeps GitHub's tree API deterministic.
+       */
+      const deletionPaths = files
+        .filter((file) => file.content === null)
+        .map((file) => file.path.replace(/\\/g, '/').replace(/^\/+/, '').replace(/^\.\//, ''))
+      let existingPaths: Set<string> | null = null
+      if (deletionPaths.length > 0) {
+        const { data: baseTree } = await octokit.git.getTree({
+          owner,
+          repo,
+          tree_sha: baseTreeSha,
+          recursive: '1',
+        })
+        existingPaths = new Set(
+          (baseTree.tree || [])
+            .filter((item) => item.type === 'blob' && typeof item.path === 'string')
+            .map((item) => item.path!),
+        )
+      }
+
       // 3. Create Blobs in parallel for all modified/added files
       const treeItems = await Promise.all(
-        files.map(async (file) => {
-          const isBuffer = Buffer.isBuffer(file.content)
+        files
+          .filter((file) => {
+            if (file.content !== null) return true
+            const cleanPath = file.path
+              .replace(/\\/g, '/')
+              .replace(/^\/+/, '')
+              .replace(/^\.\//, '')
+            return existingPaths?.has(cleanPath)
+          })
+          .map(async (file) => {
           const cleanPath = file.path.replace(/\\/g, '/').replace(/^\/+/, '').replace(/^\.\//, '')
+          if (file.content === null) {
+            return {
+              path: cleanPath,
+              mode: '100644' as const,
+              type: 'blob' as const,
+              sha: null,
+            }
+          }
+
+          const isBuffer = Buffer.isBuffer(file.content)
           const contentStr = isBuffer
             ? file.content.toString('base64')
             : typeof file.content === 'string'
@@ -631,7 +671,7 @@ export async function commitSessionChanges({
             type: 'blob' as const,
             sha: blob.sha,
           }
-        }),
+          }),
       )
 
       // 4. Create new Git tree with base_tree to preserve unmodified files
@@ -674,6 +714,18 @@ export async function commitSessionChanges({
   for (const file of files) {
     const cleanPath = file.path.replace(/\\/g, '/').replace(/^\/+/, '').replace(/^\.\//, '')
     const fullPath = path.join(process.cwd(), cleanPath)
+    if (file.content === null) {
+      try {
+        await unlink(fullPath)
+      } catch (error) {
+        const code =
+          typeof error === 'object' && error !== null && 'code' in error
+            ? String((error as Record<string, unknown>).code)
+            : ''
+        if (code !== 'ENOENT') throw error
+      }
+      continue
+    }
     await mkdir(path.dirname(fullPath), { recursive: true })
     if (Buffer.isBuffer(file.content)) {
       await writeFile(fullPath, file.content)
