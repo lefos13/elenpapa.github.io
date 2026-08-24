@@ -34,6 +34,7 @@
     "@octokit/rest": "^22.0.1",
     "@unhead/vue": "^2.1.1",
     "@vee-validate/zod": "^4.15.1",
+    "@vercel/analytics": "^2.0.1",
     "@vercel/node": "^5.10.2",
     "@vueuse/core": "^14.0.0",
     "@vueuse/integrations": "^14.0.0",
