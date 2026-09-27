@@ -283,7 +283,7 @@
     {
       "year": 2026,
       "title": "The Rescue of the Invincibles",
-      "cover": "",
+      "cover": "/images/books/the-rescue-of-the-invincibles-1790523657057.webp",
       "blurb": "Μυθιστόρημα Φαντασίας",
       "actions": "Διόρθωση"
     },
@@ -346,14 +346,14 @@
     {
       "year": 2026,
       "title": "Η Τελευταία Αποστολή Τόμος Α'",
-      "cover": "",
+      "cover": "/images/books/h-teleutaia-apostoli-assassins-quest-1790523623077.webp",
       "blurb": "Μυθιστόρημα Φαντασίας ",
       "actions": "Επιμέλεια-Διόρθωση"
     },
     {
       "year": 2026,
-      "title": "What to remember when you are forgetting",
-      "cover": "",
+      "title": "Τι να θυμάσαι όταν αρχίζεις να ξεχνάς",
+      "cover": "/images/books/what-to-remember-when-you-are-forgetting-1790523943062.webp",
       "blurb": "Βιβλίο αυτοβοήθειας",
       "actions": "Επιμέλεια Μετάφρασης-Διόρθωση"
     },
@@ -367,13 +367,27 @@
     {
       "year": 2026,
       "title": "Out of Frame",
-      "cover": "",
+      "cover": "/images/books/out-of-frame-cover-mt-front-1790523508679.webp",
       "blurb": "Συλλογή Διηγημάτων",
       "actions": "Επιμέλεια"
     },
     {
       "year": 2026,
       "title": "Ίσως τώρα να είναι αλλιώς",
+      "cover": "",
+      "blurb": "Ρομαντικό μυθιστόρημα",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Μάθε να τολμάς",
+      "cover": "",
+      "blurb": "Βιβλίο αυτοβοήθειας",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Game on",
       "cover": "",
       "blurb": "Ρομαντικό μυθιστόρημα",
       "actions": "Διόρθωση"
