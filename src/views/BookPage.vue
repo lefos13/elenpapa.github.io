@@ -14,14 +14,41 @@ const { siteUrl } = usePageSeo({
   structuredData: [
     {
       '@context': 'https://schema.org',
-      '@type': 'Book',
-      name: 'Ένα μόνο γράμμα',
-      author: {
-        '@type': 'Person',
-        name: 'Έλενα Παπαδοπούλου',
-      },
-      inLanguage: 'el',
-      description: "Ανακαλύψτε το βιβλίο 'Ένα μόνο γράμμα' της Έλενας Παπαδοπούλου",
+      '@graph': [
+        {
+          '@type': 'Book',
+          '@id': 'https://editopia.gr/book#book',
+          name: 'Ένα μόνο γράμμα',
+          url: 'https://editopia.gr/book',
+          image: 'https://editopia.gr/images/og/book.png',
+          author: {
+            '@type': 'Person',
+            name: 'Έλενα Παπαδοπούλου',
+            url: 'https://editopia.gr',
+          },
+          inLanguage: 'el',
+          description: "Ανακαλύψτε το βιβλίο 'Ένα μόνο γράμμα' της Έλενας Παπαδοπούλου",
+          sameAs: 'https://www.goodreads.com/book/show/60709229',
+        },
+        {
+          '@type': 'BreadcrumbList',
+          '@id': 'https://editopia.gr/book#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Αρχική',
+              item: 'https://editopia.gr/',
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Ένα μόνο γράμμα',
+              item: 'https://editopia.gr/book',
+            },
+          ],
+        },
+      ],
     },
   ],
 })
@@ -133,7 +160,7 @@ const trackOutboundClick = (label: string, href: string, location: string) => {
       <div class="container about-inner">
         <div class="about-copy">
           <h2>{{ about.heading }}</h2>
-          <p class="body-text">{{ about.body }}</p>
+          <p v-if="about.body" class="body-text">{{ about.body }}</p>
           <div class="hero-actions">
             <a
               v-if="hero?.goodreadsUrl && hero?.goodreadsLabel"

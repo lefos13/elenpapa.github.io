@@ -26,20 +26,24 @@ const post = computed(() => {
   return foundPost
 })
 
-const postImageSrc = computed(() => post.value?.image || '')
+const postImageFallback = '/images/common/book-placeholder.svg'
+const postImageSrc = computed(() => post.value?.image || postImageFallback)
 const postImageSrcset = ref('')
 
-/**
- * Why this exists:
- * Uploaded images may occasionally miss one srcset candidate size. If the
- * browser picks a missing file, fallback to the base src path immediately.
- */
-const handleResponsiveImageError = (event: Event) => {
+const handlePostImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
-  if (!img || img.dataset.srcsetFallbackApplied === 'true') return
-  img.dataset.srcsetFallbackApplied = 'true'
-  img.removeAttribute('srcset')
-  img.src = img.getAttribute('src') || ''
+  if (!img || img.src.endsWith('book-placeholder.svg')) return
+
+  // First retry without srcset (one responsive variant may be missing),
+  // then fall back to the shared placeholder if the base image is also gone.
+  if (img.dataset.srcsetFallbackApplied !== 'true') {
+    img.dataset.srcsetFallbackApplied = 'true'
+    img.removeAttribute('srcset')
+    img.src = img.getAttribute('src') || ''
+    return
+  }
+
+  img.src = postImageFallback
 }
 
 watch(
@@ -94,52 +98,141 @@ const canonicalUrl = computed(() => `${siteUrl.value}/posts/${postId.value}`)
 // Use generated OG images for social sharing (beautiful templates with title + description)
 const ogImageUrl = computed(() => `${siteUrl.value}/images/og/post-${postId.value}.png`)
 
+const postTitle = computed(() => post.value?.title || 'Άρθρο')
+const postDescription = computed(() => {
+  const summary = post.value?.summary || 'Συμβουλές για συγγραφείς από την Έλενα Παπαδοπούλου'
+  if (summary.length <= 158) return summary
+  return `${summary.slice(0, 157).replace(/\s+\S*$/, '')}…`
+})
+const postRobots = computed(() => (post.value ? 'index, follow' : 'noindex, nofollow'))
+const headTitle = computed(() =>
+  postTitle.value.length > 45 ? postTitle.value : `${postTitle.value} | Έλενα Παπαδοπούλου`,
+)
+
+// Schema.org data for the article + its breadcrumb trail.
+const postSchema = computed(() => {
+  if (!post.value) return null
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BlogPosting',
+        '@id': `${canonicalUrl.value}#article`,
+        headline: postTitle.value,
+        description: postDescription.value,
+        image: ogImageUrl.value,
+        url: canonicalUrl.value,
+        mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl.value },
+        author: {
+          '@type': 'Person',
+          name: 'Έλενα Παπαδοπούλου',
+          url: siteUrl.value,
+        },
+        publisher: {
+          '@type': 'Person',
+          name: 'Έλενα Παπαδοπούλου',
+          url: siteUrl.value,
+        },
+        inLanguage: 'el',
+        isPartOf: { '@type': 'WebSite', '@id': `${siteUrl.value}/#website` },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${canonicalUrl.value}#breadcrumb`,
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Αρχική',
+            item: `${siteUrl.value}/`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Άρθρα',
+            item: `${siteUrl.value}/#posts`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: postTitle.value,
+            item: canonicalUrl.value,
+          },
+        ],
+      },
+    ],
+  }
+})
+
+// The stored article markup may contain its own <h1>; demote it so the page has one top-level heading.
+const renderedPostContent = computed(() =>
+  postContentHtml.value
+    .replace(/<h1(\s[^>]*)?>/gi, '<h2$1>')
+    .replace(/<\/h1>/gi, '</h2>'),
+)
+
 // Dynamic head meta tags for SEO and social sharing
 useHead(
-  computed(() => ({
-    title: post.value?.title || 'Άρθρο',
-    meta: [
-      // Basic SEO
-      {
-        name: 'description',
-        content: post.value?.summary || 'Συμβουλές για συγγραφείς από την Έλενα Παπαδοπούλου',
-      },
-      { name: 'robots', content: 'index, follow' },
-      { name: 'author', content: 'Έλενα Παπαδοπούλου' },
+  computed(() => {
+    const head: {
+      title: string
+      meta: Array<{ name?: string; property?: string; content: string }>
+      link: Array<{ rel: string; href: string }>
+      script?: Array<{ type: string; textContent: string }>
+    } = {
+      title: headTitle.value,
+      meta: [
+        // Basic SEO
+        { name: 'description', content: postDescription.value },
+        { name: 'robots', content: postRobots.value },
+        { name: 'author', content: 'Έλενα Παπαδοπούλου' },
 
-      // Open Graph (Facebook, LinkedIn, etc.)
-      { property: 'og:type', content: 'article' },
-      { property: 'og:title', content: post.value?.title || 'Άρθρο' },
-      {
-        property: 'og:description',
-        content: post.value?.summary || 'Συμβουλές για συγγραφείς από την Έλενα Παπαδοπούλου',
-      },
-      { property: 'og:image', content: ogImageUrl.value },
-      { property: 'og:image:width', content: '1200' },
-      { property: 'og:image:height', content: '630' },
-      { property: 'og:image:alt', content: post.value?.title || 'Άρθρο' },
-      { property: 'og:url', content: canonicalUrl.value },
-      { property: 'og:site_name', content: siteName.value },
-      { property: 'og:locale', content: siteData.value?.seo.locale || 'el_GR' },
+        // Open Graph (Facebook, LinkedIn, etc.)
+        { property: 'og:type', content: 'article' },
+        { property: 'og:title', content: postTitle.value },
+        { property: 'og:description', content: postDescription.value },
+        { property: 'og:image', content: ogImageUrl.value },
+        { property: 'og:image:width', content: '1200' },
+        { property: 'og:image:height', content: '630' },
+        { property: 'og:image:alt', content: postTitle.value },
+        { property: 'og:url', content: canonicalUrl.value },
+        { property: 'og:site_name', content: siteName.value },
+        { property: 'og:locale', content: siteData.value?.seo.locale || 'el_GR' },
 
-      // Twitter Card
-      { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:title', content: post.value?.title || 'Άρθρο' },
-      {
-        name: 'twitter:description',
-        content: post.value?.summary || 'Συμβουλές για συγγραφείς από την Έλενα Παπαδοπούλου',
-      },
-      { name: 'twitter:image', content: ogImageUrl.value },
-      { name: 'twitter:image:alt', content: post.value?.title || 'Άρθρο' },
-    ],
-    link: [{ rel: 'canonical', href: canonicalUrl.value }],
-  })),
+        // Twitter Card
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:title', content: postTitle.value },
+        { name: 'twitter:description', content: postDescription.value },
+        { name: 'twitter:image', content: ogImageUrl.value },
+        { name: 'twitter:image:alt', content: postTitle.value },
+      ],
+      link: [{ rel: 'canonical', href: canonicalUrl.value }],
+    }
+
+    if (postSchema.value) {
+      head.script = [
+        {
+          type: 'application/ld+json',
+          textContent: JSON.stringify(postSchema.value),
+        },
+      ]
+    }
+
+    return head
+  }),
 )
 
 const fetchData = async () => {
   const [postsData, site] = await Promise.all([content.getPosts(), content.getSite()])
   data.value = postsData
   siteData.value = site
+
+  const src = post.value?.image
+  if (src) {
+    const resolved = await resolveResponsiveSrcset(src, [400, 800])
+    if (postImageSrc.value === src) postImageSrcset.value = resolved ?? ''
+  }
+
   await fetchPostContent()
 }
 
@@ -173,7 +266,14 @@ const goBack = () => {
 <template>
   <main id="content" role="main" class="post-page">
     <article v-if="post" class="container">
-      <button @click="goBack" class="back-button" aria-label="Go back">← Πίσω</button>
+      <nav class="breadcrumbs" aria-label="Διαδρομή πλοήγησης">
+        <RouterLink to="/">Αρχική</RouterLink>
+        <span aria-hidden="true">/</span>
+        <RouterLink to="/#posts">Άρθρα</RouterLink>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{{ post.title }}</span>
+      </nav>
+      <button @click="goBack" class="back-button" aria-label="Επιστροφή στην αρχική">← Πίσω</button>
 
       <div class="post-header">
         <div class="image-wrapper">
@@ -187,13 +287,13 @@ const goBack = () => {
             fetchpriority="high"
             width="800"
             height="440"
-            @error="handleResponsiveImageError"
+            @error="handlePostImageError"
           />
         </div>
         <h1>{{ post.title }}</h1>
       </div>
 
-      <div class="post-content" v-html="postContentHtml"></div>
+      <div class="post-content" v-html="renderedPostContent"></div>
     </article>
 
     <PostsCarousel v-if="post" :exclude-id="postId" :with-diagonal="false" />

@@ -26,14 +26,35 @@ const itemListSchema = computed(() => {
   if (!items.length) return null
   return {
     '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    name: 'Εργογραφία - Έλενα Παπαδοπούλου',
-    description: 'Η πλήρης εργογραφία: βιβλία, μεταφράσεις, επιμέλειες και συνεργασίες',
-    itemListElement: items.map((item, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      name: item.title,
-    })),
+    '@graph': [
+      {
+        '@type': 'ItemList',
+        name: 'Εργογραφία - Έλενα Παπαδοπούλου',
+        description: 'Η πλήρης εργογραφία: βιβλία, μεταφράσεις, επιμέλειες και συνεργασίες',
+        itemListElement: items.map((item, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: item.title,
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Αρχική',
+            item: 'https://editopia.gr/',
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Εργογραφία',
+            item: 'https://editopia.gr/timeline',
+          },
+        ],
+      },
+    ],
   }
 })
 
@@ -44,7 +65,7 @@ useHead(
       script: [
         {
           type: 'application/ld+json',
-          children: JSON.stringify(itemListSchema.value),
+          textContent: JSON.stringify(itemListSchema.value),
         },
       ],
     }

@@ -4,8 +4,8 @@ import { content, type TimelineContent } from '@/services/content'
 
 const data = ref<TimelineContent | null>(null)
 const timelineItems = computed(() => (data.value?.items ?? []).slice().reverse())
-const getTimelineCoverSrc = (coverSrc: string | undefined) => coverSrc || ''
 const placeholderSrc = '/images/common/book-placeholder.svg'
+const getTimelineCoverSrc = (coverSrc: string | undefined) => coverSrc || placeholderSrc
 
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
@@ -29,7 +29,7 @@ onMounted(fetchData)
 <template>
   <section id="timeline" class="timeline-section">
     <div class="container timeline">
-      <h2 class="section-title">Εργογραφία</h2>
+      <h1 class="section-title">Εργογραφία</h1>
       <div class="timeline-grid" aria-hidden="false">
         <div class="timeline-column timeline-column--left">
           <article

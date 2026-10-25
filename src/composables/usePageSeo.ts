@@ -91,7 +91,7 @@ export function usePageSeo(options: PageSeoOptions = {}) {
         title: string
         meta: Array<{ name?: string; property?: string; content: string }>
         link: Array<{ rel: string; href: string }>
-        script?: Array<{ type: string; children: string }>
+        script?: Array<{ type: string; textContent: string }>
       } = {
         title: pageTitle.value,
         meta,
@@ -102,7 +102,7 @@ export function usePageSeo(options: PageSeoOptions = {}) {
       if (options.structuredData && options.structuredData.length > 0) {
         headConfig.script = options.structuredData.map((data) => ({
           type: 'application/ld+json',
-          children: JSON.stringify(data),
+          textContent: JSON.stringify(data),
         }))
       }
 

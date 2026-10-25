@@ -13,14 +13,40 @@ const { siteUrl } = usePageSeo({
   structuredData: [
     {
       '@context': 'https://schema.org',
-      '@type': 'CreativeWork',
-      name: 'Ζωγραφισμένα Βιβλία',
-      author: {
-        '@type': 'Person',
-        name: 'Έλενα Παπαδοπούλου',
-      },
-      inLanguage: 'el',
-      description: 'Μια μοναδική συλλογή όπου η τέχνη συναντά τη λογοτεχνία',
+      '@graph': [
+        {
+          '@type': 'CreativeWork',
+          '@id': 'https://editopia.gr/painted-books#work',
+          name: 'Ζωγραφισμένα Βιβλία',
+          url: 'https://editopia.gr/painted-books',
+          image: 'https://editopia.gr/images/og/painted-books.png',
+          creator: {
+            '@type': 'Person',
+            name: 'Έλενα Παπαδοπούλου',
+            url: 'https://editopia.gr',
+          },
+          inLanguage: 'el',
+          description: 'Μια μοναδική συλλογή όπου η τέχνη συναντά τη λογοτεχνία',
+        },
+        {
+          '@type': 'BreadcrumbList',
+          '@id': 'https://editopia.gr/painted-books#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Αρχική',
+              item: 'https://editopia.gr/',
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Ζωγραφισμένα βιβλία',
+              item: 'https://editopia.gr/painted-books',
+            },
+          ],
+        },
+      ],
     },
   ],
 })

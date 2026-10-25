@@ -13,14 +13,46 @@ const { siteUrl } = usePageSeo({
   structuredData: [
     {
       '@context': 'https://schema.org',
-      '@type': 'Book',
-      name: 'Moonlight Tales',
-      author: {
-        '@type': 'Person',
-        name: 'Έλενα Παπαδοπούλου',
-      },
-      inLanguage: 'el',
-      description: 'Moonlight Tales: Μια συλλογή ιστοριών που εξερευνά το μυστήριο και τη μαγεία',
+      '@graph': [
+        {
+          '@type': 'CollectionPage',
+          '@id': 'https://editopia.gr/moonlight#page',
+          name: 'Moonlight Tales',
+          url: 'https://editopia.gr/moonlight',
+          image: 'https://editopia.gr/images/og/moonlight.png',
+          inLanguage: 'el',
+          description:
+            'Το Moonlight Tales είναι ένα λογοτεχνικό blog και εκδοτική κοινότητα για συγγραφείς και αναγνώστες.',
+          about: {
+            '@type': 'WebSite',
+            name: 'Moonlight Tales',
+            url: 'https://www.moonlightales.com/',
+          },
+          author: {
+            '@type': 'Person',
+            name: 'Έλενα Παπαδοπούλου',
+            url: 'https://editopia.gr',
+          },
+        },
+        {
+          '@type': 'BreadcrumbList',
+          '@id': 'https://editopia.gr/moonlight#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Αρχική',
+              item: 'https://editopia.gr/',
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Moonlight Tales',
+              item: 'https://editopia.gr/moonlight',
+            },
+          ],
+        },
+      ],
     },
   ],
 })
