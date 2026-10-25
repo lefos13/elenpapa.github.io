@@ -70,7 +70,7 @@ npm run build
 npm test
 ```
 
-Runs the automated unit and integration tests across authentication, content schemas, image processing, and GitHub adapters (64 tests).
+Runs the automated unit and integration tests across authentication, content schemas, image processing, and GitHub adapters.
 
 ## Deploying to Vercel (Production Live CMS)
 
@@ -80,15 +80,15 @@ The project is configured for deployment on Vercel as a Static Site Generated (S
 
 Configure these variables in **Vercel Project Settings > Environment Variables**:
 
-| Variable | Required | Description |
-| :--- | :--- | :--- |
-| `GITHUB_TOKEN` | Yes | GitHub Personal Access Token (or GitHub App token) with `repo` read/write permissions. |
-| `GITHUB_OWNER` | Yes | GitHub username or organization (e.g. `your-username`). |
-| `GITHUB_REPO` | Yes | Repository name (e.g. `portfolio`). |
-| `GITHUB_BRANCH` | No | Target base branch (default: `main`). |
-| `ADMIN_PASSWORD` | Yes | Secure password used to authenticate on `/admin`. |
-| `AUTH_SECRET` | Yes | Secret key for signing session JWT tokens (min 32 chars). |
-| `BACKOFFICE_CREATE_PR_ON_FINALIZE` | No | Set to `true` to automatically open a Pull Request when changes are finalized. |
+| Variable                           | Required | Description                                                                            |
+| :--------------------------------- | :------- | :------------------------------------------------------------------------------------- |
+| `GITHUB_TOKEN`                     | Yes      | GitHub Personal Access Token (or GitHub App token) with `repo` read/write permissions. |
+| `GITHUB_OWNER`                     | Yes      | GitHub username or organization (e.g. `your-username`).                                |
+| `GITHUB_REPO`                      | Yes      | Repository name (e.g. `portfolio`).                                                    |
+| `GITHUB_BRANCH`                    | No       | Target base branch (default: `main`).                                                  |
+| `ADMIN_PASSWORD`                   | Yes      | Secure password used to authenticate on `/admin`.                                      |
+| `AUTH_SECRET`                      | Yes      | Secret key for signing session JWT tokens (min 32 chars).                              |
+| `BACKOFFICE_CREATE_PR_ON_FINALIZE` | No       | Set to `true` to automatically open a Pull Request when changes are finalized.         |
 
 ### Live CMS Workflow on Vercel
 

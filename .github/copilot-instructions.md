@@ -1,5 +1,7 @@
 # GitHub Copilot Instructions
 
+> Canonical agent setup, commands, and architecture notes live in `AGENTS.md`.
+
 ## Project Vision (docs/plan.md)
 
 - Single-page Vue 3 portfolio with anchor navigation for hero, intro, book timeline, services, posts carousel, contact form, and footer.
@@ -54,7 +56,7 @@
 - Stack: Vue 3 + TypeScript + Vite. Use `<script setup lang="ts">`, composition API, and the `@` alias for imports.
 - Formatting: Prettier (no semicolons, single quotes, width 100) enforced via VS Code + Husky.
 - Lint/type gates: run `npm run lint`, `npm run type-check`, and `npm run build` before opening PRs.
-- Tests are manual for now; rely on type-check + Lighthouse runs until automated coverage is added.
+- `npm test` runs the Node test runner over `server/__tests__/*.test.ts` (API/auth/content/image/git coverage); UI coverage is still manual.
 
 ## When Adding Features
 
@@ -66,7 +68,7 @@
 ## Outstanding Priorities for Copilot
 
 - Run and document Lighthouse audit results (Performance, Accessibility, Best Practices, SEO ≥90 targets).
-- Suggest route lazy-loading for non-home views in `src/router/index.ts` to reduce initial bundle.
+- Route lazy-loading for non-home views is already implemented in `src/router/index.ts`.
 - Flag opportunities to standardize content loading (prefer `useContent` composables over direct `getX()` calls).
 - Surface any @vueuse/motion integration opportunities using existing `src/utils/animations.ts` configs.
 - Note placeholder content that needs replacement (timeline "Lorem Ipsum" titles, painted-books images).
