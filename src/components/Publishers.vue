@@ -7,6 +7,7 @@ const data = ref<PublishersContent | null>(null)
 
 const fetchData = async () => {
   data.value = await content.getPublishers()
+  await Promise.all(publishers.value.map((publisher) => ensurePublisherLogoSrcset(publisher.logo?.src)))
 }
 
 onServerPrefetch(fetchData)
@@ -25,16 +26,15 @@ const getPublisherLogoSrcset = (logoSrc: string | undefined) => {
 }
 
 const ensurePublisherLogoSrcset = (logoSrc: string | undefined) => {
-  if (
-    !logoSrc ||
-    logoSrc.endsWith('.svg') ||
-    publisherLogoSrcsetByImage.value[logoSrc] !== undefined
-  )
-    return
+  if (!logoSrc || logoSrc.endsWith('.svg')) return Promise.resolve('')
+  if (publisherLogoSrcsetByImage.value[logoSrc] !== undefined) {
+    return Promise.resolve(publisherLogoSrcsetByImage.value[logoSrc])
+  }
   const logoKey = logoSrc
   publisherLogoSrcsetByImage.value[logoKey] = ''
-  void resolveResponsiveSrcset(logoKey, [120, 240]).then((resolvedSrcset) => {
+  return resolveResponsiveSrcset(logoKey, [120, 240]).then((resolvedSrcset) => {
     publisherLogoSrcsetByImage.value[logoKey] = resolvedSrcset ?? ''
+    return resolvedSrcset ?? ''
   })
 }
 

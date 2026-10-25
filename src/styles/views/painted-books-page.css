@@ -375,7 +375,7 @@
   }
 
   .hero-image {
-    order: -1;
+    order: 1;
   }
 
   .process-steps {
@@ -390,6 +390,10 @@
 @media (max-width: 768px) {
   .painted-hero {
     padding-top: 80px;
+  }
+
+  .hero-image img {
+    height: clamp(320px, 60vh, 440px);
   }
 
   .gallery-grid {

@@ -15,7 +15,11 @@ const projectRoot = path.resolve(currentDir, '..', '..')
  * before exporting env-derived constants.
  */
 if (typeof process.loadEnvFile === 'function') {
-  process.loadEnvFile(path.join(projectRoot, '.env'))
+  try {
+    process.loadEnvFile(path.join(projectRoot, '.env'))
+  } catch (error) {
+    if (error?.code !== 'ENOENT') throw error
+  }
 }
 
 export const paths = {

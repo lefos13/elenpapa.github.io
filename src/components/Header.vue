@@ -19,6 +19,7 @@ const {
   isBubble,
   isExpanded,
   onScroll,
+  onResize: onHeaderResize,
   onEnter,
   onLeave,
   onFocusIn,
@@ -114,7 +115,10 @@ const setHeaderHeight = async () => {
 let resizeTimer: ReturnType<typeof setTimeout> | undefined
 const onResize = () => {
   clearTimeout(resizeTimer)
-  resizeTimer = globalThis.setTimeout(setHeaderHeight, 100)
+  resizeTimer = globalThis.setTimeout(() => {
+    onHeaderResize()
+    setHeaderHeight()
+  }, 100)
 }
 
 onUnmounted(() => {
@@ -176,7 +180,7 @@ const onKeyDown = (e: KeyboardEvent) => {
     @focusout="onFocusOut"
   >
     <div class="container bar">
-      <RouterLink to="/" class="brand" @click="handleBrandClick()" aria-label="Home">
+      <RouterLink to="/" class="brand" @click="handleBrandClick()" aria-label="Αρχική">
         <picture v-if="site?.logo">
           <source v-if="logoWebpSrc" :srcset="logoWebpSrc" type="image/webp" />
           <img
@@ -189,15 +193,15 @@ const onKeyDown = (e: KeyboardEvent) => {
           />
         </picture>
       </RouterLink>
-      <nav class="nav" aria-label="Primary navigation" ref="menuRef">
+      <nav class="nav" aria-label="Κύρια πλοήγηση" ref="menuRef">
         <button
           class="hamburger"
           @click="toggle"
-          aria-label="Toggle navigation menu"
+          aria-label="Άνοιγμα ή κλείσιμο μενού πλοήγησης"
           :aria-expanded="open"
           aria-controls="primary-navigation"
         >
-          <span class="sr-only">{{ open ? 'Close' : 'Open' }} navigation</span>
+          <span class="sr-only">{{ open ? 'Κλείσιμο' : 'Άνοιγμα' }} μενού πλοήγησης</span>
           <span class="hamburger-box">
             <span></span>
             <span></span>

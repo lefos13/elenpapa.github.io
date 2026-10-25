@@ -14,7 +14,7 @@ function toCandidateUrl(imageSrc: string, width: number) {
   return `${encodedPath}-${width}w.webp`
 }
 
-async function imageExistsClient(url: string) {
+async function imageExistsViaImage(url: string) {
   return new Promise<boolean>((resolve) => {
     const image = new Image()
     image.onload = () => resolve(true)
@@ -23,10 +23,23 @@ async function imageExistsClient(url: string) {
   })
 }
 
+async function imageExistsClient(url: string) {
+  try {
+    const response = await fetch(url, { method: 'HEAD' })
+    // Some static hosts reject HEAD; fall back to a decoded image probe.
+    if (response.status === 405) return imageExistsViaImage(url)
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
 async function imageExistsSsr(url: string) {
+  // Static node:* imports would break the client bundle; this branch only runs during SSR.
   const path = await import('node:path')
   const fs = await import('node:fs/promises')
-  const publicRelative = url.replace(/^\//, '')
+  // Candidate URLs are URI-encoded; filesystem paths are not.
+  const publicRelative = decodeURIComponent(url).replace(/^\//, '')
   const absolutePath = path.join(process.cwd(), 'public', publicRelative)
   try {
     await fs.access(absolutePath)
@@ -37,7 +50,8 @@ async function imageExistsSsr(url: string) {
 }
 
 async function imageExists(url: string) {
-  if (typeof window === 'undefined') return imageExistsSsr(url)
+  // `import.meta.env.SSR` is reliable even when vite-ssg mocks `window` during rendering.
+  if (import.meta.env.SSR || typeof window === 'undefined') return imageExistsSsr(url)
   return imageExistsClient(url)
 }
 

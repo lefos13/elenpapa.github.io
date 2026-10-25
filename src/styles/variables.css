@@ -6,6 +6,7 @@
   --color-surface: #ffffff;
   --color-light-gray: #3f3f3f;
   --color-text: #1f1f29;
+  --color-text-secondary: #555555;
   --color-muted: #5a5a68; /* Darkened from #6b6b7a for better contrast (4.77:1 on white) */
   --color-primary: #b39ddb; /* lilac */
   --color-primary-600: #6b4ea8; /* Darkened for WCAG AA contrast (4.62:1 on white) */
@@ -24,6 +25,7 @@
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
+  --radius-xl: 28px;
 
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);

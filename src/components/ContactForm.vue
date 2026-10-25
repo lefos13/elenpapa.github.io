@@ -21,9 +21,9 @@ const trackContactClick = (mailto: string | undefined) => {
 </script>
 
 <template>
-  <section id="contact" class="contact-section" v-reveal>
+  <section id="contact" class="contact-section" v-reveal aria-labelledby="contact-title">
     <div class="container">
-      <h2>{{ data?.title }}</h2>
+      <h2 id="contact-title">{{ data?.title }}</h2>
       <p class="desc">{{ data?.description }}</p>
 
       <div v-if="data?.mailto" class="contact-action">

@@ -5,7 +5,7 @@ import Footer from '@/components/Footer.vue'
 </script>
 
 <template>
-  <a href="#content" class="skip-link">Skip to main content</a>
+  <a href="#content" class="skip-link">Μετάβαση στο κύριο περιεχόμενο</a>
   <Header />
   <RouterView />
   <Footer />

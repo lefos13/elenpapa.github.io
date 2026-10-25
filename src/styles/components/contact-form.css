@@ -46,12 +46,23 @@
   color: var(--color-primary-600);
   text-decoration: underline;
   text-underline-offset: 4px;
-  transition: all 0.2s ease;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  transition:
+    color 0.2s ease,
+    text-decoration-thickness 0.2s ease;
 }
 
-.contact-link:hover {
-  color: var(--color-primary);
+.contact-link:hover,
+.contact-link:focus-visible {
+  color: var(--color-primary-700);
   text-decoration-thickness: 2px;
+}
+
+.contact-link:focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
 }
 
 @media (max-width: 700px) {

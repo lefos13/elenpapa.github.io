@@ -14,11 +14,15 @@ const milestoneIconSrcsetByIcon = ref<Record<string, string>>({})
 const getMilestoneIconSrc = (iconSrc: string | undefined) => iconSrc || ''
 
 const ensureMilestoneIconSrcset = (iconSrc: string | undefined) => {
-  if (!iconSrc || milestoneIconSrcsetByIcon.value[iconSrc] !== undefined) return
+  if (!iconSrc) return Promise.resolve('')
+  if (milestoneIconSrcsetByIcon.value[iconSrc] !== undefined) {
+    return Promise.resolve(milestoneIconSrcsetByIcon.value[iconSrc])
+  }
   const iconKey = iconSrc
   milestoneIconSrcsetByIcon.value[iconKey] = ''
-  void resolveResponsiveSrcset(iconKey, [100, 200]).then((resolvedSrcset) => {
+  return resolveResponsiveSrcset(iconKey, [100, 200]).then((resolvedSrcset) => {
     milestoneIconSrcsetByIcon.value[iconKey] = resolvedSrcset ?? ''
+    return resolvedSrcset ?? ''
   })
 }
 
@@ -55,6 +59,14 @@ const displayedEducation = computed(
 const fetchData = async () => {
   home.value = await content.getHome()
   isLoading.value = false
+
+  const src = home.value?.intro.image.src
+  if (src) {
+    const resolved = await resolveResponsiveSrcset(src, [400, 800])
+    if (introImageSrc.value === src) introImageSrcset.value = resolved ?? ''
+  }
+
+  await Promise.all(displayedEducation.value.map((milestone) => ensureMilestoneIconSrcset(milestone.icon)))
 }
 
 onServerPrefetch(fetchData)

@@ -7,6 +7,7 @@ const data = ref<ServicesContent | null>(null)
 
 const fetchData = async () => {
   data.value = await content.getServices()
+  await Promise.all(services.value.map((service) => ensureServiceImageSrcset(service.image?.src)))
 }
 
 onServerPrefetch(fetchData)
@@ -25,11 +26,15 @@ const getServiceImageSrcset = (imageSrc: string | undefined) => {
 }
 
 const ensureServiceImageSrcset = (imageSrc: string | undefined) => {
-  if (!imageSrc || serviceImageSrcsetByImage.value[imageSrc] !== undefined) return
+  if (!imageSrc) return Promise.resolve('')
+  if (serviceImageSrcsetByImage.value[imageSrc] !== undefined) {
+    return Promise.resolve(serviceImageSrcsetByImage.value[imageSrc])
+  }
   const imageKey = imageSrc
   serviceImageSrcsetByImage.value[imageKey] = ''
-  void resolveResponsiveSrcset(imageKey, [300, 600]).then((resolvedSrcset) => {
+  return resolveResponsiveSrcset(imageKey, [300, 600]).then((resolvedSrcset) => {
     serviceImageSrcsetByImage.value[imageKey] = resolvedSrcset ?? ''
+    return resolvedSrcset ?? ''
   })
 }
 

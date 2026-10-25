@@ -38,6 +38,7 @@
 .publisher-card {
   background: #ffffff;
   border-radius: var(--radius-lg);
+  min-width: 0;
   padding: 24px;
   box-shadow: var(--shadow-sm);
   transition:
@@ -74,6 +75,7 @@
   margin: 0 0 8px;
   color: var(--color-text);
   text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .publisher-description {
@@ -83,6 +85,7 @@
   color: var(--color-muted);
   margin: 0 0 12px;
   text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .publisher-services {
@@ -103,6 +106,8 @@
   padding: 4px 12px;
   border-radius: 999px;
   border: 1px solid rgba(126, 87, 194, 0.2);
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 768px) {

@@ -46,6 +46,8 @@ const handleStateChange = (swiper: SwiperType) => {
 
 const fetchData = async () => {
   data.value = await content.getPosts()
+  // Resolve srcsets before SSR renders so the HTML does not request a base image first.
+  await Promise.all(posts.value.map(({ post }) => ensurePostImageSrcset(post.image)))
 }
 
 onServerPrefetch(fetchData)
@@ -96,7 +98,8 @@ const posts = computed(() => {
         (!isProd || !post.devOnly) && (excludedIndex === null || index !== excludedIndex),
     )
 })
-const getPostImageSrc = (imageSrc: string | undefined) => imageSrc || ''
+const postImageFallback = '/images/common/book-placeholder.svg'
+const getPostImageSrc = (imageSrc: string | undefined) => imageSrc || postImageFallback
 const postImageSrcsetByImage = ref<Record<string, string>>({})
 
 /**
@@ -105,11 +108,15 @@ const postImageSrcsetByImage = ref<Record<string, string>>({})
  * browser may pick a missing candidate and render a broken image.
  */
 const ensurePostImageSrcset = (imageSrc: string | undefined) => {
-  if (!imageSrc || postImageSrcsetByImage.value[imageSrc] !== undefined) return
+  if (!imageSrc) return Promise.resolve('')
+  if (postImageSrcsetByImage.value[imageSrc] !== undefined) {
+    return Promise.resolve(postImageSrcsetByImage.value[imageSrc])
+  }
   const imageKey = imageSrc
   postImageSrcsetByImage.value[imageKey] = ''
-  void resolveResponsiveSrcset(imageKey, [400, 800]).then((resolvedSrcset) => {
+  return resolveResponsiveSrcset(imageKey, [400, 800]).then((resolvedSrcset) => {
     postImageSrcsetByImage.value[imageKey] = resolvedSrcset ?? ''
+    return resolvedSrcset ?? ''
   })
 }
 
@@ -125,11 +132,17 @@ const getPostImageSrcset = (imageSrc: string | undefined) => {
  */
 const handleResponsiveImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
-  if (!img || img.dataset.srcsetFallbackApplied === 'true') return
-  img.dataset.srcsetFallbackApplied = 'true'
-  img.removeAttribute('srcset')
-  // Re-assign src so the browser retries using base image only.
-  img.src = img.getAttribute('src') || ''
+  if (!img || img.src.endsWith('book-placeholder.svg')) return
+
+  if (img.dataset.srcsetFallbackApplied !== 'true') {
+    img.dataset.srcsetFallbackApplied = 'true'
+    img.removeAttribute('srcset')
+    // Re-assign src so the browser retries using base image only.
+    img.src = img.getAttribute('src') || ''
+    return
+  }
+
+  img.src = postImageFallback
 }
 
 watch(
@@ -162,13 +175,13 @@ watch(
         </div>
       </div>
 
-      <div v-else class="carousel-wrapper">
+      <div v-else-if="posts.length" class="carousel-wrapper">
         <button
           class="nav nav-prev"
           @click="scrollPrev"
           :disabled="!canScrollPrev"
-          aria-label="Previous posts"
-          title="Previous posts"
+          aria-label="Προηγούμενα άρθρα"
+          title="Προηγούμενα άρθρα"
         >
           <SvgIcon name="chevron-left" class="icon" :width="20" :height="20" ariaHidden />
           <span class="sr-only">Previous</span>
@@ -193,7 +206,7 @@ watch(
             v-for="(entry, idx) in posts"
             :key="entry.index"
             class="carousel__slide"
-            :aria-label="`Read post ${idx + 1} of ${posts.length}: ${entry.post.title}`"
+            :aria-label="`Άρθρο ${idx + 1} από ${posts.length}: ${entry.post.title}`"
           >
             <RouterLink
               :to="`/posts/${entry.index}`"
@@ -226,13 +239,14 @@ watch(
           class="nav nav-next"
           @click="scrollNext"
           :disabled="!canScrollNext"
-          aria-label="Next posts"
-          title="Next posts"
+          aria-label="Επόμενα άρθρα"
+          title="Επόμενα άρθρα"
         >
           <SvgIcon name="chevron-right" class="icon" :width="20" :height="20" ariaHidden />
           <span class="sr-only">Next</span>
         </button>
       </div>
+      <p v-else class="empty-state">Δεν υπάρχουν άρθρα ακόμη.</p>
     </div>
   </section>
 </template>

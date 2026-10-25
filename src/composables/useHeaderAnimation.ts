@@ -213,6 +213,27 @@ export function useHeaderAnimation({ headerEl, logoEl, linksEl }: UseHeaderAnima
     isBubble.value = shouldBubble
   }
 
+  /**
+   * Breakpoint/orientation changes must remove GSAP's inline bubble geometry;
+   * otherwise a desktop bubble survives into the mobile layout until the next scroll.
+   */
+  const onResize = () => {
+    if (typeof window === 'undefined') return
+    if (isDesktop()) {
+      updateBubble()
+      return
+    }
+
+    isAnimating.value = false
+    isBubble.value = false
+    isExpanded.value = false
+
+    gsap.killTweensOf([headerEl.value, linksEl.value, logoEl.value])
+    if (headerEl.value) gsap.set(headerEl.value, { clearProps: 'all' })
+    if (linksEl.value) gsap.set(linksEl.value, { clearProps: 'all' })
+    if (logoEl.value) gsap.set(logoEl.value, { clearProps: 'all' })
+  }
+
   let ticking = false
   const onScroll = () => {
     if (!ticking) {
@@ -261,6 +282,7 @@ export function useHeaderAnimation({ headerEl, logoEl, linksEl }: UseHeaderAnima
     isExpanded,
     isAnimating,
     onScroll,
+    onResize,
     onEnter,
     onLeave,
     onFocusIn,

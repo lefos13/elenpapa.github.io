@@ -39,7 +39,7 @@
 
 .entry {
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: 200px minmax(0, 1fr);
   gap: 16px;
   padding: 24px;
   position: relative;
@@ -63,7 +63,7 @@
 }
 
 .entry--right {
-  grid-template-columns: 1fr 200px;
+  grid-template-columns: minmax(0, 1fr) 200px;
 }
 
 .entry--right .meta {
@@ -125,8 +125,10 @@
 
 .meta {
   height: 100%;
+  min-width: 0;
   align-content: center;
   overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .meta h3 {
@@ -180,12 +182,12 @@
 
   .entry,
   .entry--right {
-    grid-template-columns: 180px 1fr;
+    grid-template-columns: 180px minmax(0, 1fr);
     min-height: 300px;
   }
 
   .entry--right {
-    grid-template-columns: 1fr 180px;
+    grid-template-columns: minmax(0, 1fr) 180px;
   }
 
   .cover {
@@ -224,14 +226,14 @@
 
   .entry,
   .entry--right {
-    grid-template-columns: 120px 1fr;
+    grid-template-columns: 120px minmax(0, 1fr);
     gap: 12px;
     padding: 16px;
     min-height: auto;
   }
 
   .entry--right {
-    grid-template-columns: 120px 1fr;
+    grid-template-columns: 120px minmax(0, 1fr);
   }
 
   .entry--right .meta {

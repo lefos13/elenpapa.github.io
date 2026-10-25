@@ -82,7 +82,10 @@ h1.title {
   box-shadow:
     0 4px 16px rgba(186, 171, 230, 0.4),
     0 8px 32px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.15s ease,
+    box-shadow 0.3s ease;
   cursor: pointer;
   text-decoration: none;
   letter-spacing: 0.02em;
@@ -104,7 +107,7 @@ h1.title {
 }
 
 .cta:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.96);
   box-shadow:
     0 2px 8px rgba(186, 171, 230, 0.3),
     0 4px 16px rgba(0, 0, 0, 0.15);

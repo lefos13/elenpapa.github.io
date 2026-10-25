@@ -38,7 +38,9 @@
   font-weight: 600;
   text-decoration: none;
   border-radius: var(--radius-md);
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.12s ease;
 }
 
 .cta-button:hover,
@@ -46,6 +48,20 @@
   background: var(--color-primary-700);
   outline: 2px solid var(--color-primary-600);
   outline-offset: 2px;
+}
+
+.cta-button:active {
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-button {
+    transition: none;
+  }
+
+  .cta-button:active {
+    transform: none;
+  }
 }
 
 .image {
