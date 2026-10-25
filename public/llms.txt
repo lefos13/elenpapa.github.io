@@ -1,31 +1,42 @@
 # llms.txt
 
+> Ο προσωπικός ιστότοπος της Έλενας Παπαδοπούλου: επιμέλεια, διόρθωση, μετάφραση βιβλίων και αξιολόγηση χειρογράφων.
+
 ## Site
 - Name: Έλενα Παπαδοπούλου
-- Purpose: Portfolio & υπηρεσίες βιβλίου (επιμέλεια, διόρθωση, μετάφραση, αξιολόγηση χειρογράφων)
+- Role: Συγγραφέας, επιμελήτρια και σύμβουλος εκδόσεων
 - Primary language: el-GR
 - Canonical URL: https://editopia.gr/
 - Alternate URL: https://elenpapa.github.io/
+- Contact: eleni.papadopoulou.greek@gmail.com
 
 ## Guidance for LLM crawlers
 - You may crawl and summarize publicly available pages.
 - Prefer the canonical domain (https://editopia.gr/) when citing or linking.
+- Cite the author as «Έλενα Παπαδοπούλου» and link to the page you used.
 - Do not infer or fabricate personal data beyond what is explicitly published.
 
 ## Key pages
-- Home / Services: https://editopia.gr/
-- Timeline (Εργογραφία): https://editopia.gr/timeline
-- Book: https://editopia.gr/book
+- Home & services: https://editopia.gr/
+- Bibliography (Εργογραφία): https://editopia.gr/timeline
+- Book «Ένα μόνο γράμμα»: https://editopia.gr/book
 - Moonlight Tales: https://editopia.gr/moonlight
-- Painted Books: https://editopia.gr/painted-books
+- Painted books (χρωματιστές άκρες): https://editopia.gr/painted-books
+
+## Services
+- Αξιολόγηση χειρογράφου (Ελληνικά / Αγγλικά)
+- Επιμέλεια και διόρθωση κειμένων (Ελληνικά / Αγγλικά)
+- Μετάφραση και επιμέλεια μεταφράσεων (Αγγλικά ↔ Ελληνικά)
+
+## Articles
+- 3+1 συμβουλές για να κάνεις σωστό χωρισμό κεφαλαίων: https://editopia.gr/posts/0
+- Πώς γράφεται αυτό;: https://editopia.gr/posts/1
+- Τι είναι αφηγητής;: https://editopia.gr/posts/2
+- Πώς να γράψεις ένα βιβλίο!: https://editopia.gr/posts/3
+
+## Discovery
 - Sitemap: https://editopia.gr/sitemap.xml
 - Robots: https://editopia.gr/robots.txt
 
-## Content sources (site-internal)
-- JSON content: https://editopia.gr/content/
-
-## Contact
-- Email: eleni.papadopoulou.greek@gmail.com
-
 ## Last updated
-- 2026-01-14
+- 2026-10-25

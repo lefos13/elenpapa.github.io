@@ -1,6 +1,6 @@
 import { fileURLToPath, URL } from 'node:url'
 import process from 'node:process'
-import { cpSync, existsSync, mkdirSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readFileSync } from 'node:fs'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
@@ -107,11 +107,25 @@ export default defineConfig(({ isSsrBuild }) => ({
     script: 'async',
     formatting: 'none', // Disable formatting to avoid issues with Instagram embed HTML
     mock: true,
-    // Include all static routes plus dynamic post routes (0-9 based on posts.json)
+    // Include static routes plus only the post routes that are publicly visible.
+    // Generating pages for `devOnly` posts creates empty, indexable URLs.
     includedRoutes: async (paths) => {
-      // Filter out dynamic route patterns and add concrete post routes
       const staticRoutes = paths.filter((path) => !path.includes(':'))
-      const postRoutes = Array.from({ length: 10 }, (_, i) => `/posts/${i}`)
+      let postRoutes: string[] = []
+
+      try {
+        const postsPath = fileURLToPath(new URL('./public/content/posts.json', import.meta.url))
+        const posts = JSON.parse(readFileSync(postsPath, 'utf-8')) as {
+          items?: Array<{ devOnly?: boolean }>
+        }
+        postRoutes = (posts.items ?? [])
+          .map((post, index) => ({ post, index }))
+          .filter(({ post }) => !post.devOnly)
+          .map(({ index }) => `/posts/${index}`)
+      } catch (error) {
+        console.warn('Could not read posts.json for SSG routes:', error)
+      }
+
       return [...staticRoutes, ...postRoutes]
     },
   },

@@ -1,6 +1,16 @@
-# Allow all search engines to crawl the site
+# Allow public pages and articles to be crawled
 User-agent: *
 Allow: /
+
+# Admin surfaces and raw content are not public pages
+Disallow: /admin
+Disallow: /admin/
+Disallow: /backoffice
+Disallow: /backoffice/
+Disallow: /api
+Disallow: /api/
+Disallow: /content
+Disallow: /content/
 
 # Sitemap location
 Sitemap: https://editopia.gr/sitemap.xml
