@@ -215,7 +215,7 @@
   "rewrites": [
     {
       "source": "/admin",
-      "destination": "/backoffice/index.html"
+      "destination": "/backoffice/index"
     },
     {
       "source": "/admin/(.*)",
@@ -223,7 +223,7 @@
     },
     {
       "source": "/backoffice",
-      "destination": "/backoffice/index.html"
+      "destination": "/backoffice/index"
     },
     {
       "source": "/backoffice/(.*)",
