@@ -5,14 +5,18 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { requireAuth } from '../auth-guard.js'
 import { getGitStatusSummary } from '../github.js'
-import { sendJson } from '../http.js'
+import { isHttpError, sendJson } from '../http.js'
 
 export default async function handleGitStatus(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'GET') {
     sendJson(res, 405, { ok: false, error: 'Method not allowed' })
     return
   }
+
+  const user = await requireAuth(req, res)
+  if (!user) return
 
   try {
     const summary = await getGitStatusSummary()
@@ -33,7 +37,10 @@ export default async function handleGitStatus(req: VercelRequest, res: VercelRes
 
     sendJson(res, 200, { status })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to retrieve git status.'
-    sendJson(res, 500, { ok: false, error: message })
+    if (isHttpError(error)) {
+      sendJson(res, error.statusCode, { ok: false, error: error.message })
+      return
+    }
+    sendJson(res, 500, { ok: false, error: 'Failed to retrieve git status.' })
   }
 }

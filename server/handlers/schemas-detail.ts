@@ -6,6 +6,7 @@
 
 import path from 'node:path'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { requireAuth } from '../auth-guard.js'
 import { readContentFileFromGit } from '../github.js'
 import { HttpError, isHttpError, sendJson } from '../http.js'
 import { getSchemaById } from '../schemas.js'
@@ -41,6 +42,9 @@ export default async function handleSchemasDetail(req: VercelRequest, res: Verce
     sendJson(res, 405, { ok: false, error: 'Method not allowed' })
     return
   }
+
+  const user = await requireAuth(req, res)
+  if (!user) return
 
   try {
     const schemaId = extractSchemaId(req)

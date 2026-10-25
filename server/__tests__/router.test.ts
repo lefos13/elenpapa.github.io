@@ -115,7 +115,12 @@ describe('Unified Catch-All Router (api/[...path].ts)', () => {
   })
 
   it('routes GET /api/files', async () => {
-    const req = createMockRequest({ method: 'GET', url: '/api/files' })
+    const token = await createSessionToken({ user: 'admin' })
+    const req = createMockRequest({
+      method: 'GET',
+      url: '/api/files',
+      headers: { cookie: `${AUTH_COOKIE_NAME}=${token}` },
+    })
     const res = createMockResponse()
 
     await routerHandler(req, res)
@@ -127,7 +132,12 @@ describe('Unified Catch-All Router (api/[...path].ts)', () => {
   })
 
   it('routes GET /api/files/contact.json', async () => {
-    const req = createMockRequest({ method: 'GET', url: '/api/files/contact.json' })
+    const token = await createSessionToken({ user: 'admin' })
+    const req = createMockRequest({
+      method: 'GET',
+      url: '/api/files/contact.json',
+      headers: { cookie: `${AUTH_COOKIE_NAME}=${token}` },
+    })
     const res = createMockResponse()
 
     await routerHandler(req, res)
@@ -139,7 +149,12 @@ describe('Unified Catch-All Router (api/[...path].ts)', () => {
   })
 
   it('routes GET /api/schemas/book.json', async () => {
-    const req = createMockRequest({ method: 'GET', url: '/api/schemas/book.json' })
+    const token = await createSessionToken({ user: 'admin' })
+    const req = createMockRequest({
+      method: 'GET',
+      url: '/api/schemas/book.json',
+      headers: { cookie: `${AUTH_COOKIE_NAME}=${token}` },
+    })
     const res = createMockResponse()
 
     await routerHandler(req, res)
@@ -150,7 +165,12 @@ describe('Unified Catch-All Router (api/[...path].ts)', () => {
   })
 
   it('routes GET /api/git/status', async () => {
-    const req = createMockRequest({ method: 'GET', url: '/api/git/status' })
+    const token = await createSessionToken({ user: 'admin' })
+    const req = createMockRequest({
+      method: 'GET',
+      url: '/api/git/status',
+      headers: { cookie: `${AUTH_COOKIE_NAME}=${token}` },
+    })
     const res = createMockResponse()
 
     await routerHandler(req, res)

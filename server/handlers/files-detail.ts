@@ -51,6 +51,9 @@ export default async function handleFilesDetail(req: VercelRequest, res: VercelR
     const fileName = extractFilePath(req)
 
     if (method === 'GET' || method === 'HEAD') {
+      const user = await requireAuth(req, res)
+      if (!user) return
+
       const { content, sha } = await readContentFileFromGit({ filePath: fileName })
       const schema = buildEditorSchema({ filePath: fileName, content })
 

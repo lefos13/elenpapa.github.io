@@ -6,6 +6,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import path from 'node:path'
+import { requireAuth } from '../auth-guard.js'
 import { sendJson } from '../http.js'
 
 export interface SessionSummaryResult {
@@ -60,6 +61,9 @@ export default async function handleSessionSummary(req: VercelRequest, res: Verc
     sendJson(res, 405, { ok: false, error: 'Method not allowed' })
     return
   }
+
+  const user = await requireAuth(req, res)
+  if (!user) return
 
   try {
     const rawPaths = req.query.paths

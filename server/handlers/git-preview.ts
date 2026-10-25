@@ -6,6 +6,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import path from 'node:path'
+import { requireAuth } from '../auth-guard.js'
 import { readJsonBody, sendJson } from '../http.js'
 
 interface PreviewRequestBody {
@@ -52,6 +53,9 @@ export default async function handleGitPreview(req: VercelRequest, res: VercelRe
     sendJson(res, 405, { ok: false, error: 'Method not allowed' })
     return
   }
+
+  const user = await requireAuth(req, res)
+  if (!user) return
 
   try {
     const body = await readJsonBody<PreviewRequestBody>(req)

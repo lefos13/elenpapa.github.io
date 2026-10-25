@@ -7,6 +7,7 @@
 import { stat } from 'node:fs/promises'
 import path from 'node:path'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { requireAuth } from '../auth-guard.js'
 import { listContentFilesFromGit } from '../github.js'
 import { isHttpError, sendJson } from '../http.js'
 import { listContentFileDescriptors } from '../schemas.js'
@@ -16,6 +17,9 @@ export default async function handleFilesIndex(req: VercelRequest, res: VercelRe
     sendJson(res, 405, { ok: false, error: 'Method not allowed' })
     return
   }
+
+  const user = await requireAuth(req, res)
+  if (!user) return
 
   try {
     const files = await listContentFilesFromGit()

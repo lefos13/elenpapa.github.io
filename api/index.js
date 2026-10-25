@@ -7,11 +7,30 @@ var GITHUB_TOKEN = String(process.env.GITHUB_TOKEN ?? "").trim();
 var GITHUB_OWNER = String(process.env.GITHUB_OWNER ?? "").trim();
 var GITHUB_REPO = String(process.env.GITHUB_REPO ?? "").trim();
 var GITHUB_BRANCH = String(process.env.GITHUB_BRANCH ?? "main").trim();
-var AUTH_SECRET = String(
-  process.env.AUTH_SECRET ?? process.env.JWT_SECRET ?? "development-insecure-auth-secret-key-change-in-production"
-).trim();
-var ADMIN_PASSWORD = String(process.env.ADMIN_PASSWORD ?? "admin");
+var DEVELOPMENT_AUTH_SECRET = "development-insecure-auth-secret-key-change-in-production";
+var DEVELOPMENT_ADMIN_PASSWORD = "admin";
+var MIN_AUTH_SECRET_LENGTH = 32;
+var rawAuthSecret = String(process.env.AUTH_SECRET ?? process.env.JWT_SECRET ?? "").trim();
+var rawAdminPassword = String(process.env.ADMIN_PASSWORD ?? "").trim();
+var AUTH_SECRET = rawAuthSecret || DEVELOPMENT_AUTH_SECRET;
+var ADMIN_PASSWORD = rawAdminPassword || DEVELOPMENT_ADMIN_PASSWORD;
 var ADMIN_PASSWORD_HASH = String(process.env.ADMIN_PASSWORD_HASH ?? "").trim();
+function isProductionRuntime() {
+  return process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
+}
+function getAuthConfigurationIssue() {
+  if (!isProductionRuntime()) return null;
+  if (!rawAuthSecret || rawAuthSecret === DEVELOPMENT_AUTH_SECRET || rawAuthSecret.length < MIN_AUTH_SECRET_LENGTH) {
+    return `AUTH_SECRET must be set to a random value of at least ${MIN_AUTH_SECRET_LENGTH} characters.`;
+  }
+  if (ADMIN_PASSWORD_HASH && !/^[a-f0-9]{64}$/i.test(ADMIN_PASSWORD_HASH)) {
+    return "ADMIN_PASSWORD_HASH must be a 64-character SHA-256 hex digest.";
+  }
+  if (!ADMIN_PASSWORD_HASH && (!rawAdminPassword || rawAdminPassword === DEVELOPMENT_ADMIN_PASSWORD)) {
+    return "ADMIN_PASSWORD (or ADMIN_PASSWORD_HASH) must be set to a non-default value.";
+  }
+  return null;
+}
 var CREATE_PR_ON_FINALIZE = String(
   process.env.CREATE_PR_ON_FINALIZE ?? process.env.BACKOFFICE_CREATE_PR_ON_FINALIZE ?? "false"
 ).toLowerCase() === "true";
@@ -67,87 +86,6 @@ var MIME_TYPES = {
   ".svg": "image/svg+xml",
   ".webp": "image/webp"
 };
-
-// server/auth.ts
-function getSecretKey() {
-  return new TextEncoder().encode(AUTH_SECRET);
-}
-function appendHeader(res, name, value) {
-  if (typeof res.setHeader !== "function") return;
-  const existing = typeof res.getHeader === "function" ? res.getHeader(name) : void 0;
-  if (!existing) {
-    res.setHeader(name, value);
-  } else if (Array.isArray(existing)) {
-    res.setHeader(name, [...existing, value]);
-  } else {
-    res.setHeader(name, [String(existing), value]);
-  }
-}
-async function createSessionToken(payload, expiresIn = "7d") {
-  const secretKey = getSecretKey();
-  return await new SignJWT({ ...payload }).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime(expiresIn).sign(secretKey);
-}
-async function verifySessionToken(token) {
-  if (!token) return null;
-  try {
-    const secretKey = getSecretKey();
-    const { payload } = await jwtVerify(token, secretKey, {
-      algorithms: ["HS256"]
-    });
-    return payload;
-  } catch {
-    return null;
-  }
-}
-function parseCookies(req) {
-  const cookieHeader = req.headers.cookie;
-  const cookies = {};
-  if (!cookieHeader) return cookies;
-  const parts = cookieHeader.split(";");
-  for (let i = 0; i < parts.length; i++) {
-    const cookie = parts[i]?.trim();
-    if (!cookie) continue;
-    const eqIdx = cookie.indexOf("=");
-    if (eqIdx !== -1) {
-      const key = cookie.substring(0, eqIdx).trim();
-      const val = cookie.substring(eqIdx + 1).trim();
-      cookies[key] = decodeURIComponent(val);
-    }
-  }
-  return cookies;
-}
-function setAuthCookie(res, token, maxAgeSeconds = 7 * 24 * 60 * 60) {
-  const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
-  const secureFlag = isProduction ? "; Secure" : "";
-  const cookieValue = `${AUTH_COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; Max-Age=${maxAgeSeconds}; HttpOnly${secureFlag}; SameSite=Lax`;
-  appendHeader(res, "Set-Cookie", cookieValue);
-}
-function clearAuthCookie(res) {
-  const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
-  const secureFlag = isProduction ? "; Secure" : "";
-  const cookieValue = `${AUTH_COOKIE_NAME}=; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly${secureFlag}; SameSite=Lax`;
-  appendHeader(res, "Set-Cookie", cookieValue);
-}
-function verifyAdminPassword(password) {
-  if (!password) return false;
-  if (ADMIN_PASSWORD_HASH) {
-    const computedHash = crypto.createHash("sha256").update(password).digest("hex");
-    const computedBuf = Buffer.from(computedHash, "utf-8");
-    const expectedBuf2 = Buffer.from(ADMIN_PASSWORD_HASH, "utf-8");
-    if (computedBuf.length !== expectedBuf2.length) {
-      crypto.timingSafeEqual(computedBuf, computedBuf);
-      return false;
-    }
-    return crypto.timingSafeEqual(computedBuf, expectedBuf2);
-  }
-  const inputBuf = Buffer.from(password, "utf-8");
-  const expectedBuf = Buffer.from(ADMIN_PASSWORD, "utf-8");
-  if (inputBuf.length !== expectedBuf.length) {
-    crypto.timingSafeEqual(inputBuf, inputBuf);
-    return false;
-  }
-  return crypto.timingSafeEqual(inputBuf, expectedBuf);
-}
 
 // server/http.ts
 var HttpError = class _HttpError extends Error {
@@ -245,6 +183,96 @@ async function readJsonBody(req, limitBytes = 12 * 1024 * 1024) {
   });
 }
 
+// server/auth.ts
+function getSecretKey() {
+  return new TextEncoder().encode(AUTH_SECRET);
+}
+function assertAuthConfigured() {
+  if (getAuthConfigurationIssue()) {
+    throw new HttpError(
+      503,
+      "Authentication is not configured. Set AUTH_SECRET (32+ characters) and ADMIN_PASSWORD (or ADMIN_PASSWORD_HASH) in the deployment environment."
+    );
+  }
+}
+function appendHeader(res, name, value) {
+  if (typeof res.setHeader !== "function") return;
+  const existing = typeof res.getHeader === "function" ? res.getHeader(name) : void 0;
+  if (!existing) {
+    res.setHeader(name, value);
+  } else if (Array.isArray(existing)) {
+    res.setHeader(name, [...existing, value]);
+  } else {
+    res.setHeader(name, [String(existing), value]);
+  }
+}
+async function createSessionToken(payload, expiresIn = "7d") {
+  assertAuthConfigured();
+  const secretKey = getSecretKey();
+  return await new SignJWT({ ...payload }).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime(expiresIn).sign(secretKey);
+}
+async function verifySessionToken(token) {
+  if (!token || getAuthConfigurationIssue()) return null;
+  try {
+    const secretKey = getSecretKey();
+    const { payload } = await jwtVerify(token, secretKey, {
+      algorithms: ["HS256"]
+    });
+    return payload;
+  } catch {
+    return null;
+  }
+}
+function parseCookies(req) {
+  const cookieHeader = req.headers.cookie;
+  const cookies = {};
+  if (!cookieHeader) return cookies;
+  const parts = cookieHeader.split(";");
+  for (let i = 0; i < parts.length; i++) {
+    const cookie = parts[i]?.trim();
+    if (!cookie) continue;
+    const eqIdx = cookie.indexOf("=");
+    if (eqIdx !== -1) {
+      const key = cookie.substring(0, eqIdx).trim();
+      const val = cookie.substring(eqIdx + 1).trim();
+      cookies[key] = decodeURIComponent(val);
+    }
+  }
+  return cookies;
+}
+function setAuthCookie(res, token, maxAgeSeconds = 7 * 24 * 60 * 60) {
+  const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+  const secureFlag = isProduction ? "; Secure" : "";
+  const cookieValue = `${AUTH_COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; Max-Age=${maxAgeSeconds}; HttpOnly${secureFlag}; SameSite=Lax`;
+  appendHeader(res, "Set-Cookie", cookieValue);
+}
+function clearAuthCookie(res) {
+  const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+  const secureFlag = isProduction ? "; Secure" : "";
+  const cookieValue = `${AUTH_COOKIE_NAME}=; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly${secureFlag}; SameSite=Lax`;
+  appendHeader(res, "Set-Cookie", cookieValue);
+}
+function verifyAdminPassword(password) {
+  if (!password || getAuthConfigurationIssue()) return false;
+  if (ADMIN_PASSWORD_HASH) {
+    const computedHash = crypto.createHash("sha256").update(password).digest("hex");
+    const computedBuf = Buffer.from(computedHash, "utf-8");
+    const expectedBuf2 = Buffer.from(ADMIN_PASSWORD_HASH, "utf-8");
+    if (computedBuf.length !== expectedBuf2.length) {
+      crypto.timingSafeEqual(computedBuf, computedBuf);
+      return false;
+    }
+    return crypto.timingSafeEqual(computedBuf, expectedBuf2);
+  }
+  const inputBuf = Buffer.from(password, "utf-8");
+  const expectedBuf = Buffer.from(ADMIN_PASSWORD, "utf-8");
+  if (inputBuf.length !== expectedBuf.length) {
+    crypto.timingSafeEqual(inputBuf, inputBuf);
+    return false;
+  }
+  return crypto.timingSafeEqual(inputBuf, expectedBuf);
+}
+
 // server/handlers/auth-login.ts
 async function handleAuthLogin(req, res) {
   if (req.method !== "POST") {
@@ -252,7 +280,8 @@ async function handleAuthLogin(req, res) {
     return;
   }
   try {
-    const body = await readJsonBody(req);
+    assertAuthConfigured();
+    const body = await readJsonBody(req, 8 * 1024);
     const password = typeof body?.password === "string" ? body.password : "";
     const username = typeof body?.username === "string" && body.username.trim().length > 0 ? body.username.trim() : "admin";
     if (!verifyAdminPassword(password)) {
@@ -269,10 +298,13 @@ async function handleAuthLogin(req, res) {
       user: username
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Authentication failed.";
+    if (isHttpError(error)) {
+      sendJson(res, error.statusCode, { ok: false, error: error.message });
+      return;
+    }
     sendJson(res, 500, {
       ok: false,
-      error: message
+      error: "Authentication failed."
     });
   }
 }
@@ -1638,6 +1670,8 @@ async function handleFilesDetail(req, res) {
   try {
     const fileName = extractFilePath(req);
     if (method === "GET" || method === "HEAD") {
+      const user = await requireAuth(req, res);
+      if (!user) return;
       const { content, sha } = await readContentFileFromGit({ filePath: fileName });
       const schema = buildEditorSchema({ filePath: fileName, content });
       sendJson(res, 200, {
@@ -1731,6 +1765,8 @@ async function handleFilesIndex(req, res) {
     sendJson(res, 405, { ok: false, error: "Method not allowed" });
     return;
   }
+  const user = await requireAuth(req, res);
+  if (!user) return;
   try {
     const files = await listContentFilesFromGit();
     const statsMap = {};
@@ -1953,6 +1989,8 @@ async function handleGitPreview(req, res) {
     sendJson(res, 405, { ok: false, error: "Method not allowed" });
     return;
   }
+  const user = await requireAuth(req, res);
+  if (!user) return;
   try {
     const body = await readJsonBody(req);
     const sessionPaths = normalizeSessionPaths(body?.sessionPaths);
@@ -1980,6 +2018,8 @@ async function handleGitStatus(req, res) {
     sendJson(res, 405, { ok: false, error: "Method not allowed" });
     return;
   }
+  const user = await requireAuth(req, res);
+  if (!user) return;
   try {
     const summary = await getGitStatusSummary();
     const status = {
@@ -1997,8 +2037,11 @@ async function handleGitStatus(req, res) {
     };
     sendJson(res, 200, { status });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to retrieve git status.";
-    sendJson(res, 500, { ok: false, error: message });
+    if (isHttpError(error)) {
+      sendJson(res, error.statusCode, { ok: false, error: error.message });
+      return;
+    }
+    sendJson(res, 500, { ok: false, error: "Failed to retrieve git status." });
   }
 }
 
@@ -2089,6 +2132,8 @@ async function handleSchemasDetail(req, res) {
     sendJson(res, 405, { ok: false, error: "Method not allowed" });
     return;
   }
+  const user = await requireAuth(req, res);
+  if (!user) return;
   try {
     const schemaId = extractSchemaId(req);
     const { content } = await readContentFileFromGit({ filePath: schemaId });
@@ -2144,6 +2189,8 @@ async function handleSessionSummary(req, res) {
     sendJson(res, 405, { ok: false, error: "Method not allowed" });
     return;
   }
+  const user = await requireAuth(req, res);
+  if (!user) return;
   try {
     const rawPaths = req.query.paths;
     const touchedPaths = parseQueryPaths(rawPaths);
@@ -2448,6 +2495,8 @@ async function handleValidateFile(req, res) {
     sendJson(res, 405, { ok: false, error: "Method not allowed" });
     return;
   }
+  const user = await requireAuth(req, res);
+  if (!user) return;
   try {
     const filePath = extractFilePath2(req);
     const body = await readJsonBody(req);

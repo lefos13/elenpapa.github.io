@@ -9,14 +9,49 @@ export const GITHUB_OWNER: string = String(process.env.GITHUB_OWNER ?? '').trim(
 export const GITHUB_REPO: string = String(process.env.GITHUB_REPO ?? '').trim()
 export const GITHUB_BRANCH: string = String(process.env.GITHUB_BRANCH ?? 'main').trim()
 
-export const AUTH_SECRET: string = String(
-  process.env.AUTH_SECRET ??
-    process.env.JWT_SECRET ??
-    'development-insecure-auth-secret-key-change-in-production',
-).trim()
+const DEVELOPMENT_AUTH_SECRET = 'development-insecure-auth-secret-key-change-in-production'
+const DEVELOPMENT_ADMIN_PASSWORD = 'admin'
+const MIN_AUTH_SECRET_LENGTH = 32
 
-export const ADMIN_PASSWORD: string = String(process.env.ADMIN_PASSWORD ?? 'admin')
+const rawAuthSecret = String(process.env.AUTH_SECRET ?? process.env.JWT_SECRET ?? '').trim()
+const rawAdminPassword = String(process.env.ADMIN_PASSWORD ?? '').trim()
+
+export const AUTH_SECRET: string = rawAuthSecret || DEVELOPMENT_AUTH_SECRET
+export const ADMIN_PASSWORD: string = rawAdminPassword || DEVELOPMENT_ADMIN_PASSWORD
 export const ADMIN_PASSWORD_HASH: string = String(process.env.ADMIN_PASSWORD_HASH ?? '').trim()
+
+/**
+ * Vercel sets VERCEL=1. Locally, NODE_ENV=production is the equivalent production signal.
+ */
+export function isProductionRuntime(): boolean {
+  return process.env.VERCEL === '1' || process.env.NODE_ENV === 'production'
+}
+
+/**
+ * Returns a human-readable configuration problem for production deployments.
+ * Local development deliberately keeps the convenience defaults.
+ */
+export function getAuthConfigurationIssue(): string | null {
+  if (!isProductionRuntime()) return null
+
+  if (
+    !rawAuthSecret ||
+    rawAuthSecret === DEVELOPMENT_AUTH_SECRET ||
+    rawAuthSecret.length < MIN_AUTH_SECRET_LENGTH
+  ) {
+    return `AUTH_SECRET must be set to a random value of at least ${MIN_AUTH_SECRET_LENGTH} characters.`
+  }
+
+  if (ADMIN_PASSWORD_HASH && !/^[a-f0-9]{64}$/i.test(ADMIN_PASSWORD_HASH)) {
+    return 'ADMIN_PASSWORD_HASH must be a 64-character SHA-256 hex digest.'
+  }
+
+  if (!ADMIN_PASSWORD_HASH && (!rawAdminPassword || rawAdminPassword === DEVELOPMENT_ADMIN_PASSWORD)) {
+    return 'ADMIN_PASSWORD (or ADMIN_PASSWORD_HASH) must be set to a non-default value.'
+  }
+
+  return null
+}
 
 export const CREATE_PR_ON_FINALIZE: boolean =
   String(

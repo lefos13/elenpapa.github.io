@@ -7,7 +7,14 @@
 import crypto from 'node:crypto'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { SignJWT, jwtVerify, type JWTPayload } from 'jose'
-import { ADMIN_PASSWORD, ADMIN_PASSWORD_HASH, AUTH_COOKIE_NAME, AUTH_SECRET } from './config.js'
+import {
+  ADMIN_PASSWORD,
+  ADMIN_PASSWORD_HASH,
+  AUTH_COOKIE_NAME,
+  AUTH_SECRET,
+  getAuthConfigurationIssue,
+} from './config.js'
+import { HttpError } from './http.js'
 
 export interface SessionPayload extends JWTPayload {
   user: string
@@ -16,6 +23,18 @@ export interface SessionPayload extends JWTPayload {
 
 function getSecretKey(): Uint8Array {
   return new TextEncoder().encode(AUTH_SECRET)
+}
+
+/**
+ * Fails closed when a production deployment still uses development credentials.
+ */
+export function assertAuthConfigured(): void {
+  if (getAuthConfigurationIssue()) {
+    throw new HttpError(
+      503,
+      'Authentication is not configured. Set AUTH_SECRET (32+ characters) and ADMIN_PASSWORD (or ADMIN_PASSWORD_HASH) in the deployment environment.',
+    )
+  }
 }
 
 /**
@@ -40,6 +59,7 @@ export async function createSessionToken(
   payload: { user: string; role?: string; [key: string]: unknown },
   expiresIn: string = '7d',
 ): Promise<string> {
+  assertAuthConfigured()
   const secretKey = getSecretKey()
   return await new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256' })
@@ -52,7 +72,7 @@ export async function createSessionToken(
  * Verifies a JWT session token and returns the decoded payload, or null if invalid/expired.
  */
 export async function verifySessionToken(token: string): Promise<SessionPayload | null> {
-  if (!token) return null
+  if (!token || getAuthConfigurationIssue()) return null
   try {
     const secretKey = getSecretKey()
     const { payload } = await jwtVerify(token, secretKey, {
@@ -115,7 +135,7 @@ export function clearAuthCookie(res: ServerResponse): void {
  * Validates the submitted admin password against ADMIN_PASSWORD_HASH or ADMIN_PASSWORD using timing-safe comparisons.
  */
 export function verifyAdminPassword(password: string): boolean {
-  if (!password) return false
+  if (!password || getAuthConfigurationIssue()) return false
 
   // 1. If ADMIN_PASSWORD_HASH (SHA-256 hex) is provided
   if (ADMIN_PASSWORD_HASH) {

@@ -64,10 +64,22 @@ function createMockResponse() {
   return res
 }
 
+const authHeaders = async () => {
+  const token = await createSessionToken({ user: 'admin' })
+  return { cookie: `${AUTH_COOKIE_NAME}=${token}` }
+}
+
 describe('Content API Endpoints', () => {
   describe('GET /api/files', () => {
-    it('returns list of content files and descriptors with 200', async () => {
+    it('returns 401 without a session', async () => {
       const req = createMockRequest({ method: 'GET' })
+      const res = createMockResponse()
+      await handleFilesIndex(req, res)
+      assert.equal(res._getStatusCode(), 401)
+    })
+
+    it('returns list of content files and descriptors with 200', async () => {
+      const req = createMockRequest({ method: 'GET', headers: await authHeaders() })
       const res = createMockResponse()
       await handleFilesIndex(req, res)
       assert.equal(res._getStatusCode(), 200)
@@ -80,7 +92,11 @@ describe('Content API Endpoints', () => {
 
   describe('GET /api/files/:file', () => {
     it('returns content and revision for valid file', async () => {
-      const req = createMockRequest({ method: 'GET', query: { file: 'book.json' } })
+      const req = createMockRequest({
+        method: 'GET',
+        query: { file: 'book.json' },
+        headers: await authHeaders(),
+      })
       const res = createMockResponse()
       await handleFilesDetail(req, res)
       assert.equal(res._getStatusCode(), 200)
@@ -156,7 +172,11 @@ describe('Content API Endpoints', () => {
 
   describe('GET /api/schemas/:id', () => {
     it('returns schema metadata for valid id', async () => {
-      const req = createMockRequest({ method: 'GET', query: { id: 'site.json' } })
+      const req = createMockRequest({
+        method: 'GET',
+        query: { id: 'site.json' },
+        headers: await authHeaders(),
+      })
       const res = createMockResponse()
       await handleSchemasDetail(req, res)
       assert.equal(res._getStatusCode(), 200)
@@ -170,6 +190,7 @@ describe('Content API Endpoints', () => {
       const req = createMockRequest({
         method: 'POST',
         query: { file: 'contact.json' },
+        headers: await authHeaders(),
         body: { title: 'Contact', description: 'desc', mailto: 'a@b.com', emailLabel: 'email' },
       })
       const res = createMockResponse()

@@ -63,10 +63,22 @@ function createMockResponse() {
   return res
 }
 
+const authHeaders = async () => {
+  const token = await createSessionToken({ user: 'admin' })
+  return { cookie: `${AUTH_COOKIE_NAME}=${token}` }
+}
+
 describe('Git Endpoints', () => {
   describe('GET /api/git/status', () => {
-    it('returns status payload', async () => {
+    it('returns 401 without a session', async () => {
       const req = createMockRequest({ method: 'GET' })
+      const res = createMockResponse()
+      await handleGitStatus(req, res)
+      assert.equal(res._getStatusCode(), 401)
+    })
+
+    it('returns status payload', async () => {
+      const req = createMockRequest({ method: 'GET', headers: await authHeaders() })
       const res = createMockResponse()
       await handleGitStatus(req, res)
       assert.equal(res._getStatusCode(), 200)
@@ -79,6 +91,7 @@ describe('Git Endpoints', () => {
     it('returns preview for session paths', async () => {
       const req = createMockRequest({
         method: 'POST',
+        headers: await authHeaders(),
         body: { sessionPaths: ['public/content/site.json'] },
       })
       const res = createMockResponse()
@@ -124,7 +137,11 @@ describe('Git Endpoints', () => {
 
   describe('GET /api/session/summary', () => {
     it('returns summary for query paths', async () => {
-      const req = createMockRequest({ method: 'GET', query: { paths: 'public/content/site.json' } })
+      const req = createMockRequest({
+        method: 'GET',
+        query: { paths: 'public/content/site.json' },
+        headers: await authHeaders(),
+      })
       const res = createMockResponse()
       await handleSessionSummary(req, res)
       assert.equal(res._getStatusCode(), 200)

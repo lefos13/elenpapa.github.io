@@ -6,8 +6,13 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { createSessionToken, setAuthCookie, verifyAdminPassword } from '../auth.js'
-import { readJsonBody, sendJson } from '../http.js'
+import {
+  assertAuthConfigured,
+  createSessionToken,
+  setAuthCookie,
+  verifyAdminPassword,
+} from '../auth.js'
+import { isHttpError, readJsonBody, sendJson } from '../http.js'
 
 interface LoginRequestBody {
   username?: string
@@ -21,7 +26,8 @@ export default async function handleAuthLogin(req: VercelRequest, res: VercelRes
   }
 
   try {
-    const body = await readJsonBody<LoginRequestBody>(req)
+    assertAuthConfigured()
+    const body = await readJsonBody<LoginRequestBody>(req, 8 * 1024)
     const password = typeof body?.password === 'string' ? body.password : ''
     const username =
       typeof body?.username === 'string' && body.username.trim().length > 0
@@ -44,10 +50,13 @@ export default async function handleAuthLogin(req: VercelRequest, res: VercelRes
       user: username,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Authentication failed.'
+    if (isHttpError(error)) {
+      sendJson(res, error.statusCode, { ok: false, error: error.message })
+      return
+    }
     sendJson(res, 500, {
       ok: false,
-      error: message,
+      error: 'Authentication failed.',
     })
   }
 }
