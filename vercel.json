@@ -231,11 +231,11 @@
     },
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.js"
+      "destination": "/api/index"
     },
     {
       "source": "/api",
-      "destination": "/api/index.js"
+      "destination": "/api/index"
     }
   ]
 }
