@@ -452,7 +452,7 @@ function loadCacheManifest() {
 
 function saveCacheManifest(manifest) {
   try {
-    writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2), 'utf-8')
+    writeFileSync(MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`, 'utf-8')
   } catch (error) {
     console.warn('Could not persist OG cache manifest:', error.message)
   }
